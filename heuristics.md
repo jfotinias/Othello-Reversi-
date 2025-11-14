@@ -1,22 +1,24 @@
-🎯 Othello AI — Οδηγίες Ευρετικών & Καταμερισμός Εργασιών
+🎯 **Othello AI — Οδηγίες Ευρετικών & Καταμερισμός Εργασιών**
 
 Project: Intelligent Othello Agent using Minimax / Alpha-Beta
 
-📌 Στόχος
+
+📌 **Στόχος**
 
 Κάθε μέλος της ομάδας αναλαμβάνει να υλοποιήσει διαφορετική ευρετική συνάρτηση evaluate() για το παιχνίδι Othello, ώστε να συγκρίνουμε τις επιδόσεις τους μέσα από Minimax.
 
 Όλες οι ευρετικές θα υλοποιηθούν μέσα στην κλάση Board και θα δοκιμαστούν στις ίδιες test positions.
 
-🧩 Ευρετικές που θα υλοποιηθούν
+
+🧩 **Ευρετικές που θα υλοποιηθούν**
+
 1️⃣ **Heuristic A** — Piece Difference (Basic)
 
-Υπεύθυνος: <Mike>
+Υπεύθυνος: Mike
 
 Μετράει πόσα κομμάτια έχει ο παίκτης - πόσα έχει ο αντίπαλος.
 
 score = (#player_pieces) – (#opponent_pieces)
-
 
 <u>Πλεονεκτήματα:</u>
 -Απλή
@@ -26,13 +28,15 @@ score = (#player_pieces) – (#opponent_pieces)
 -Αδύναμη στο early game
 -Δεν κατανοεί σημαντικές θέσεις του ταμπλό
 
+
 2️⃣ **Heuristic B** — Weighted Squares (3-2-1)
 
-Υπεύθυνος: <Chris>
+Υπεύθυνος: Chris
 
 Χρησιμοποιεί έναν πίνακα βαρών για να δώσει μεγαλύτερη σημασία στις γωνίες και στα edges.
 
 🔢 Προτεινόμενος πίνακας βαρών
+```
 	0	1	2	3	4	5	6	7
   ________________________________  
 0 |	3	2	2	2	2	2	2	3
@@ -43,6 +47,7 @@ score = (#player_pieces) – (#opponent_pieces)
 5 |	2	1	1	1	1	1	1	2
 6 |	2	1	1	1	1	1	1	2
 7 |	3	2	2	2	2	2	2	3
+```
 
 score = Σ weight[i][j] * piece_value
 piece_value = +1 player / -1 opponent
@@ -54,14 +59,14 @@ piece_value = +1 player / -1 opponent
 <u>Μειονεκτήματα:</u>
 -Αγνοεί κινητικότητα και σταθερότητα
 
+
 3️⃣ **Heuristic C** — Mobility
 
-Υπεύθυνος: <Mike>
+Υπεύθυνος: Mike
 
 Μετράει πόσες διαθέσιμες κινήσεις έχει ο παίκτης σε σχέση με τον αντίπαλο.
 
 score = available_moves(player) – available_moves(opponent)
-
 
 <u>Πλεονεκτήματα:</u>
 -Πολύ καλή στο mid-game
@@ -69,14 +74,14 @@ score = available_moves(player) – available_moves(opponent)
 <u>Μειονεκτήματα:</u>
 -Όχι ιδανική στο endgame
 
+
 4️⃣ **Heuristic D** — Stability
 
-Υπεύθυνος: <Mike>
+Υπεύθυνος: Mike
 
 Μετράει τα "stable" κομμάτια που δεν μπορούν να ανατραπούν.
 
 score = stable_own – stable_opponent
-
 
 <u>Πλεονεκτήματα:</u>
 -Εξαιρετική στο endgame
@@ -85,9 +90,10 @@ score = stable_own – stable_opponent
 <u>Μειονεκτήματα:</u>
 -Πολύ δύσκολη υλοποίηση
 
+
 5️⃣ **Heuristic E** — Frontier Disks
 
-Υπεύθυνος: <Chris>
+Υπεύθυνος: Chris
 
 Μετράει πόσα κομμάτια βρίσκονται δίπλα σε άδεια τετράγωνα (επικίνδυνες θέσεις).
 
