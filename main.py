@@ -1,45 +1,57 @@
 from Board import Board
+from Player import HumanPlayer, AIPlayer
 
 def main():
     game = Board()
-    print("Αρχική κατάσταση πίνακα:")
-    game.print_board()
 
-    # Ο τελευταίος παίκτης ήταν W, άρα ξεκινά ο B
-    while not game.is_terminal():
-        # Εναλλαγή παίκτη
-        current_player = game.B if game.last_player == game.W else game.W
-        symbol = "B" if current_player == game.B else "W"
+    # Human = Black (-1), AI = White (1)
+    human = HumanPlayer(game.B)
+    ai = AIPlayer(game.W)
 
-        # Εύρεση διαθέσιμων κινήσεων
-        moves = game.available_moves()
+    current_player = human if game.last_player == game.W else ai
 
-        # Αν δεν υπάρχουν κινήσεις, παραλείπει τη σειρά του
-        if not moves:
-            print(f"⚠️  Ο {symbol} δεν έχει διαθέσιμες κινήσεις! Παράλειψη σειράς.")
-            game.change_last_player()
-            continue
+    while True:
+        print("\n-----------------------------------")
+        print(f"🔄 Σειρά του {'B' if current_player.player_letter == game.B else 'W'}")
 
-        # Επιλέγει την πρώτη διαθέσιμη κίνηση (ή θα μπορούσε να είναι AI)
-        row, col = moves[0]
-        print(f"\nΟ {symbol} παίζει στο ({row}, {col})")
+        # Τερματισμός παιχνιδιού
+        if game.is_terminal():
+            break
 
-        # Εκτέλεση κίνησης
-        game.make_move(row, col, current_player)
         game.print_board()
 
-    # Τέλος παιχνιδιού
-    print("\n🎯 Το παιχνίδι τελείωσε!")
-    white_count = sum(row.count(game.W) for row in game.Board)
-    black_count = sum(row.count(game.B) for row in game.Board)
+        available = game.available_moves()
 
-    print(f"Λευκά (W): {white_count}")
-    print(f"Μαύρα (B): {black_count}")
+        if not available:
+            print("⚠️ Αυτός ο παίκτης δεν έχει διαθέσιμες κινήσεις. Πάσο.")
+            game.change_last_player()
+            current_player = ai if current_player is human else human
+            continue
 
-    if white_count > black_count:
-        print("🏁 Νίκη για τον Λευκό!")
-    elif black_count > white_count:
-        print("🏁 Νίκη για τον Μαύρο!")
+        # Παίζει κίνηση
+        move = current_player.choose_move(game)
+        row, col = move
+
+        print(f"▶ Κίνηση στο ({row}, {col})")
+        game.make_move(row, col, current_player.player_letter)
+
+        # Αλλαγή παίκτη
+        current_player = ai if current_player is human else human
+
+    # --- ΤΕΛΙΚΑ ΑΠΟΤΕΛΕΣΜΑΤΑ ---
+    print("\n🏁 Τελική κατάσταση:")
+    game.print_board()
+
+    whites = sum(r.count(game.W) for r in game.Board)
+    blacks = sum(r.count(game.B) for r in game.Board)
+
+    print(f"Λευκά (W): {whites}")
+    print(f"Μαύρα (B): {blacks}")
+
+    if whites > blacks:
+        print("🎉 Νίκη για τα λευκά!")
+    elif blacks > whites:
+        print("🎉 Νίκη για τα μαύρα!")
     else:
         print("🤝 Ισοπαλία!")
 
