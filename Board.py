@@ -27,7 +27,7 @@ class Board:
 
 
     def print_board(self):
-        symbols = {self.W: 'W', self.B: 'B', self.EMPTY: '.'}
+        symbols = {1: 'W', -1: 'B', 0: '.'}
         print("    0 1 2 3 4 5 6 7")
         print("  __________________")
         for i, row in enumerate(self.Board):
