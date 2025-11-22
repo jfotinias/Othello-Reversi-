@@ -4,21 +4,26 @@ from Player import HumanPlayer, AIPlayer
 def main():
     game = Board()
 
+    # ----- Επιλογή χρώματος -----
     human_letter = input("Διάλεξε χρώμα W ή B: ").upper()
     while human_letter not in ['W', 'B']:
         human_letter = input("Άκυρο χρώμα! Διάλεξε W ή B: ").upper()
 
     print(f"Εσύ παίζεις με τα {human_letter}.")
-    ai_letter = 'W' if human_letter == 'B' else 'B'
+    ai_letter = 'B' if human_letter == 'W' else 'W'
     print(f"Ο υπολογιστής παίζει με τα {ai_letter}.")
 
     human = HumanPlayer(Board.W if human_letter == 'W' else Board.B)
-    ai = AIPlayer(Board.W if ai_letter == 'W' else Board.B)
+    ai    = AIPlayer(Board.W if ai_letter == 'W' else Board.B, max_depth=4)
 
-    # Ο B παίζει πάντα πρώτος στο Othello
+    # ----- Ο ΜΑΥΡΟΣ ΠΑΙΖΕΙ ΠΑΝΤΑ ΠΡΩΤΟΣ -----
+    game.last_player = Board.W   # => σειρά έχει ο B
+
     current_player = human if human_letter == 'B' else ai
 
+    # ----- ΚΥΡΙΩΣ ΒΡΟΧΟΣ ΠΑΙΧΝΙΔΙΟΥ -----
     while True:
+
         print("\n-----------------------------------")
         print("🔄 Σειρά του", current_player.print_player())
 
@@ -27,20 +32,28 @@ def main():
 
         game.print_board()
 
-        available = game.available_moves()
-        if not available:
+        moves = game.available_moves()
+        if not moves:
             print("⚠️ Δεν υπάρχουν διαθέσιμες κινήσεις. Πάσο.")
             game.change_last_player()
             current_player = ai if current_player is human else human
             continue
 
         move = current_player.choose_move(game)
-        row, col = move
+        if move is None:
+            game.change_last_player()
+            current_player = ai if current_player is human else human
+            continue
 
+        row, col = move
         print(f"▶ Κίνηση στο ({row}, {col})")
+
         game.make_move(row, col, current_player.player_letter)
+        game.change_last_player()
+
         current_player = ai if current_player is human else human
 
+    # ----- ΤΕΛΟΣ ΠΑΙΧΝΙΔΙΟΥ -----
     print("\n🏁 Τελική κατάσταση:")
     game.print_board()
 

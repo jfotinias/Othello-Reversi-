@@ -88,6 +88,7 @@ class Board:
                             if self.Board[x][y] == current_player:
                                 valid_moves.append((i, j))
                                 break
+                            break
             return valid_moves
 
         return list(set(get_valid_moves()))

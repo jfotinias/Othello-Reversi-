@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+from Move import Move
+from Board import Board
 
 class Player(ABC):
     def __init__(self, player_letter):
@@ -61,19 +63,59 @@ class AIPlayer(Player):
         return self.player_letter == other_player.player_letter
 
     def choose_move(self, board):
-        moves = board.available_moves()
-        if not moves:
+        best_move = self.minimax(board)
+
+        if best_move is None:
             return None
-        return moves[0]
     
-    def minimax(self, board, depth):
-        if self.player_letter == board.B:
-            return min(board, depth)
+        return (best_move.row, best_move.col)
+    
+
+    def minimax(self, board):
+        # AI είναι max-player
+        if self.player_letter == board.W:
+            return self.max(board, 0)
         else:
-            return max(board, depth)
+            return self.min(board, 0)
+
 
     def min(self, board, depth):
-        pass
+
+        if depth == self.max_depth or board.is_terminal():
+            return Move(board.last_move.row, board.last_move.col, board.evaluate_weighted(self.player_letter))
+    
+        children_list = board.get_children(-self.player_letter)
+
+        if not children_list:
+            return Move(board.last_move.row, board.last_move.col, board.evaluate_weighted(self.player_letter))
+
+        min_move = Move(value=float('inf'))
+
+        for child in children_list:
+            current_move = self.max(child, depth + 1)
+            if current_move.value < min_move.value:
+                min_move = current_move
+
+        return min_move
+
 
     def max(self, board, depth):
-        pass
+
+        if depth == self.max_depth or board.is_terminal():
+            return Move(board.last_move.row, board.last_move.col, board.evaluate_weighted(self.player_letter))
+    
+        children_list = board.get_children(self.player_letter)
+
+        if not children_list:
+            return Move(board.last_move.row, board.last_move.col, board.evaluate_weighted(self.player_letter))
+
+        max_move = Move(value=float('-inf'))
+
+        for child in children_list:
+            current_move = self.min(child, depth + 1)
+            if current_move.value > max_move.value:
+                max_move = current_move
+
+        return max_move
+
+    
