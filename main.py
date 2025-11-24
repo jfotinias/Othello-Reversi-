@@ -17,8 +17,6 @@ def main():
     ai    = AIPlayer(Board.W if ai_letter == 'W' else Board.B, max_depth=4)
 
     # ----- Ο ΜΑΥΡΟΣ ΠΑΙΖΕΙ ΠΑΝΤΑ ΠΡΩΤΟΣ -----
-    game.last_player = Board.W   # => σειρά έχει ο B
-
     current_player = human if human_letter == 'B' else ai
 
     # ----- ΚΥΡΙΩΣ ΒΡΟΧΟΣ ΠΑΙΧΝΙΔΙΟΥ -----
@@ -40,16 +38,15 @@ def main():
             continue
 
         move = current_player.choose_move(game)
-        if move is None:
+        row, col = move if move is not None else (None, None)
+        if move is None or game.is_valid_move(row, col) == False:
             game.change_last_player()
             current_player = ai if current_player is human else human
             continue
 
-        row, col = move
         print(f"▶ Κίνηση στο ({row}, {col})")
 
         game.make_move(row, col, current_player.player_letter)
-        game.change_last_player()
 
         current_player = ai if current_player is human else human
 

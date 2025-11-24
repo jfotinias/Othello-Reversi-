@@ -84,15 +84,14 @@ class AIPlayer(Player):
         if depth == self.max_depth or board.is_terminal():
             return Move(board.last_move.row, board.last_move.col, board.evaluate_weighted(self.player_letter))
     
-        children_list = board.get_children(-self.player_letter)
-
-        if not children_list:
-            return Move(board.last_move.row, board.last_move.col, board.evaluate_weighted(self.player_letter))
-
+        children = board.get_children(-self.player_letter)
         min_move = Move(value=float('inf'))
 
-        for child in children_list:
+        for (i, j), child in children.items():
             current_move = self.max(child, depth + 1)
+            current_move.row = i
+            current_move.col = j
+
             if current_move.value < min_move.value:
                 min_move = current_move
 
@@ -104,15 +103,14 @@ class AIPlayer(Player):
         if depth == self.max_depth or board.is_terminal():
             return Move(board.last_move.row, board.last_move.col, board.evaluate_weighted(self.player_letter))
     
-        children_list = board.get_children(self.player_letter)
-
-        if not children_list:
-            return Move(board.last_move.row, board.last_move.col, board.evaluate_weighted(self.player_letter))
-
+        children = board.get_children(self.player_letter)
         max_move = Move(value=float('-inf'))
 
-        for child in children_list:
+        for (i, j), child in children.items():
             current_move = self.min(child, depth + 1)
+            current_move.row = i
+            current_move.col = j
+
             if current_move.value > max_move.value:
                 max_move = current_move
 

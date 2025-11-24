@@ -69,8 +69,8 @@ class Board:
 
         def get_valid_moves():
             valid_moves = []
-            for i in range(len(self.Board)):
-                for j in range(len(self.Board[i])):
+            for i in range(8):
+                for j in range(8):
                     if self.Board[i][j] != self.EMPTY:
                         continue
 
@@ -88,7 +88,7 @@ class Board:
                             if self.Board[x][y] == current_player:
                                 valid_moves.append((i, j))
                                 break
-                            break
+
             return valid_moves
 
         return list(set(get_valid_moves()))
@@ -134,13 +134,13 @@ class Board:
     
     
     def get_children(self, letter):
-        children = []
+        children = {}
 
         for (i, j) in self.available_moves():
             if self.is_valid_move(i, j):
                 child = copy.deepcopy(self)
                 child.make_move(i, j, letter)
-                children.append(child)
+                children[(i, j)] = child
 
         return children
     
