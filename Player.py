@@ -63,57 +63,71 @@ class AIPlayer(Player):
         return self.player_letter == other_player.player_letter
 
     def choose_move(self, board):
-        best_move = self.minimax(board)
+        best_move = self.minimax(board)[1]
 
         if best_move is None:
             return None
     
-        return (best_move.row, best_move.col)
+        return best_move
     
 
     def minimax(self, board):
         # AI είναι max-player
         if self.player_letter == board.W:
-            return self.max(board, 0)
+            return self.max(board, 0, float('-inf'), float('inf'))
         else:
-            return self.min(board, 0)
+            return self.min(board, 0, float('-inf'), float('inf'))
 
 
-    def min(self, board, depth):
+    def min(self, board, depth, alpha, beta):
 
         if depth == self.max_depth or board.is_terminal():
-            return Move(board.last_move.row, board.last_move.col, board.evaluate_weighted(self.player_letter))
+            return (board.evaluate_weighted(self.player_letter), (board.last_move.row, board.last_move.col))
     
         children = board.get_children(-self.player_letter)
-        min_move = Move(value=float('inf'))
+        if not children:
+            return self.max(board, depth + 1, alpha, beta)
 
-        for (i, j), child in children.items():
-            current_move = self.max(child, depth + 1)
-            current_move.row = i
-            current_move.col = j
+        best_value = float('inf')
+        best_move = None
 
-            if current_move.value < min_move.value:
-                min_move = current_move
+        for (row, col), child in children.items():
+            child_value = self.max(child, depth + 1, alpha, beta)[0]
 
-        return min_move
+            if child_value < best_value:
+                best_value = child_value
+                best_move = (row, col)
+
+            if best_value <= alpha:
+                return (best_value, best_move)
+            
+            beta = min(beta, best_value)
+
+        return (best_value, best_move)
 
 
-    def max(self, board, depth):
+    def max(self, board, depth, alpha, beta):
 
         if depth == self.max_depth or board.is_terminal():
-            return Move(board.last_move.row, board.last_move.col, board.evaluate_weighted(self.player_letter))
+            return (board.evaluate_weighted(self.player_letter), (board.last_move.row, board.last_move.col))
     
         children = board.get_children(self.player_letter)
-        max_move = Move(value=float('-inf'))
+        if not children:
+            return self.min(board, depth + 1, alpha, beta)
 
-        for (i, j), child in children.items():
-            current_move = self.min(child, depth + 1)
-            current_move.row = i
-            current_move.col = j
+        best_value = float('-inf')
+        best_move = None
 
-            if current_move.value > max_move.value:
-                max_move = current_move
+        for (row, col), child in children.items():
+            child_value = self.min(child, depth + 1, alpha, beta)[0]
 
-        return max_move
+            if child_value > best_value:
+                best_value = child_value
+                best_move = (row, col)
 
-    
+            if best_value >= beta:
+                return (best_value, best_move)
+            
+            alpha = max(alpha, best_value)
+
+        return (best_value, best_move)
