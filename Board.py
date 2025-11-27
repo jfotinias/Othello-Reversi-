@@ -61,18 +61,20 @@ class Board:
         return lines
         
 
-    def available_moves(self):
+    def available_moves(self, is_sorted=False):
         # ο παίκτης που έχει σειρά
         current_player = self.B if self.last_player == self.W else self.W
         # ο τελευταίος που έπαιξε
         opponent = self.last_player
 
         def get_valid_moves():
-            valid_moves = []
+            valid_moves = {}
             for i in range(8):
                 for j in range(8):
                     if self.Board[i][j] != self.EMPTY:
                         continue
+
+                    total_flips = 0
 
                     for path in self.get_lines(i, j):
                         if len(path) < 2:
@@ -82,16 +84,36 @@ class Board:
                         if first != opponent:
                             continue
 
-                        for (x, y) in path[1:]:
+                        count = 0
+                        for (x, y) in path:
                             if self.Board[x][y] == self.EMPTY:
                                 break
+                            if self.Board[x][y] == opponent:
+                                count += 1
                             if self.Board[x][y] == current_player:
-                                valid_moves.append((i, j))
+                                total_flips += count
                                 break
+
+                    if total_flips > 0:
+                        valid_moves[(i, j)] = total_flips
 
             return valid_moves
 
-        return list(set(get_valid_moves()))
+        if not is_sorted:
+            return list(get_valid_moves().keys())
+        else:
+
+            def weights(move):
+                i, j = move
+                if (i == 0 or i == 7) and (j == 0 or j == 7):
+                    return 5  # γωνίες
+                elif i == 0 or i == 7 or j == 0 or j == 7:
+                    return 3  # άκρα
+                else:
+                    return 1  # εσωτερικά
+                
+            sorted_moves = sorted(get_valid_moves().items(), key=lambda item: item[1] + weights(item[0]), reverse=True)
+            return [move for move, flips in sorted_moves]
 
     
     def make_move(self, row, col, letter):
@@ -136,7 +158,7 @@ class Board:
     def get_children(self, letter):
         children = {}
 
-        for (i, j) in self.available_moves():
+        for (i, j) in self.available_moves(is_sorted=True):
             if self.is_valid_move(i, j):
                 child = copy.deepcopy(self)
                 child.make_move(i, j, letter)

@@ -9,12 +9,19 @@ def main():
     while human_letter not in ['W', 'B']:
         human_letter = input("Άκυρο χρώμα! Διάλεξε W ή B: ").upper()
 
+    while True:
+        try:
+            max_depth = int(input("Διάλεξε το βάθος του ΑΙplayer: "))
+            break
+        except:
+            print("Άκυρη τιμή! Πρέπει να δώσεις έναν ακέραιο")
+
     print(f"Εσύ παίζεις με τα {human_letter}.")
     ai_letter = 'B' if human_letter == 'W' else 'W'
     print(f"Ο υπολογιστής παίζει με τα {ai_letter}.")
 
     human = HumanPlayer(Board.W if human_letter == 'W' else Board.B)
-    ai    = AIPlayer(Board.W if ai_letter == 'W' else Board.B, max_depth=4)
+    ai    = AIPlayer(Board.W if ai_letter == 'W' else Board.B, max_depth)
 
     # ----- Ο ΜΑΥΡΟΣ ΠΑΙΖΕΙ ΠΑΝΤΑ ΠΡΩΤΟΣ -----
     current_player = human if human_letter == 'B' else ai
