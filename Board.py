@@ -115,7 +115,7 @@ class Board:
             sorted_moves = sorted(get_valid_moves().items(), key=lambda item: item[1] + weights(item[0]), reverse=True)
             return [move for move, flips in sorted_moves]
             
-    def available_moves(self, player):
+    def available_moves_for(self, player):
         opponent = self.W if player == self.B else self.B
         valid_moves = []
         
@@ -216,8 +216,8 @@ class Board:
     def evaluate_mobility(self, player):
         opponent = self.W if player == self.B else self.B
         
-        player_moves = len(self.available_moves(player))
-        opponent_moves = len(self.available_moves(opponent))
+        player_moves = len(self.available_moves_for(player))
+        opponent_moves = len(self.available_moves_for(opponent))
 
         return player_moves - opponent_moves
     
