@@ -114,7 +114,32 @@ class Board:
                 
             sorted_moves = sorted(get_valid_moves().items(), key=lambda item: item[1] + weights(item[0]), reverse=True)
             return [move for move, flips in sorted_moves]
+            
+    def available_moves(self, player):
+        opponent = self.W if player == self.B else self.B
+        valid_moves = []
+        
+        for i in range(8):
+            for j in range(8):
+                if self.Board[i][j] != self.EMPTY:
+                    continue
 
+                for path in self.get_lines(i, j):
+                    if len(path) < 2:
+                        continue
+
+                    first = self.Board[path[0][0]][path[0][1]]
+                    if first != opponent:
+                        continue
+
+                    for (x, y) in path[1:]:
+                        if self.Board[x][y] == self.EMPTY:
+                            break
+                        if self.Board[x][y] == player:
+                            valid_moves.append((i, j))
+                            break
+                            
+        return list(set(valid_moves))
     
     def make_move(self, row, col, letter):
         self.Board[row][col] = letter
@@ -171,6 +196,30 @@ class Board:
         if len(self.available_moves()) == 0 and len(self.copy_change_last_player().available_moves()) == 0:
             return True
         return False
+        
+    def evaluate_piece_diff(self, player):
+        opponent = self.W if player == self.B else self.B
+
+        player_count = 0
+        opponent_count = 0
+
+        for i in range(8):
+            for j in range(8):
+                piece = self.Board[i][j]
+                if piece == player:
+                    player_count += 1
+                elif piece == opponent:
+                    opponent_count += 1
+
+        return player_count - opponent_count
+        
+    def evaluate_mobility(self, player):
+        opponent = self.W if player == self.B else self.B
+        
+        player_moves = len(self.available_moves(player))
+        opponent_moves = len(self.available_moves(opponent))
+
+        return player_moves - opponent_moves
     
     
     def evaluate_weighted(self, player):
