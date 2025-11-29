@@ -1,0 +1,41 @@
+.board-container {
+  display: grid;
+  grid-template-rows: repeat(8, 60px);
+  gap: 6px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(8, 60px);
+  gap: 6px;
+}
+
+.square {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #084310, #189e1a, #a2ff00);
+  border-radius: 6px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+.square:hover {
+  transform: scale(1.1);
+}
+
+.piece.white, .piece.black {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+}
+
+.piece.white {
+  background: white;
+}
+
+.piece.black {
+  background: black;
+}

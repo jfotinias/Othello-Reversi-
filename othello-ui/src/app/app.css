@@ -1,0 +1,195 @@
+/* ------------------ Layout ------------------ */
+main {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ------------------ Animated Title Bar ------------------ */
+/* -------------------------------------------
+   ΠΑΝΩ ΜΠΑΡΑ ΜΕ GRADIENT ΣΤΙΣ ΑΚΡΕΣ
+------------------------------------------- */
+:host {
+  /* ΧΡΩΜΑΤΑ ΓΙΑ ΤΟ GRADIENT ΣΤΑ ΤΕΤΡΑΓΩΝΑ */
+  --color0: #000000;
+  --color1: #084310;   
+  --color2: #189e1a;   
+  --color3: #a2ff00;   
+  
+  /* GRADIENT ΓΙΑ ΚΑΘΕ ΤΕΤΡΑΓΩΝΟ */
+  --background-gradient: 
+    linear-gradient(to right,
+      var(--color0) 0%,
+      var(--color1) 15%,
+      var(--color2) 25%,
+      var(--color2) 75%,
+      var(--color1) 85%,
+      var(--color0) 100%
+    );
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--background-gradient);
+  height: 140px;
+  width: 100%;
+  position: relative;
+}
+
+.text-container {
+  position: relative;
+}
+
+.text-container > h2 {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  
+  font-size: 5rem;
+  font-weight: 700;
+  margin: 0;
+  padding: 0;
+}
+
+.text-container > h2:nth-child(1) {
+  color: transparent;
+  -webkit-text-stroke: 3px #000000;   /* Outline */
+}
+
+.text-container > h2:nth-child(2) {
+  color: #000000;
+  animation: animation 4s ease-in-out infinite;
+}
+
+/* ------------------ Animation ------------------ */
+@keyframes animation {
+  0%, 100% {
+    clip-path: polygon(
+      0% 25%, 16% 44%, 33% 50%, 54% 60%,
+      70% 61%, 84% 59%, 100% 52%, 100% 100%, 0% 100%
+    );
+  }
+  50% {
+    clip-path: polygon(
+      0% 60%, 15% 65%, 34% 66%, 51% 62%,
+      67% 50%, 84% 45%, 100% 46%, 100% 100%, 0% 100%
+    );
+  }
+}
+
+/* ------------------ Board Container ------------------ */
+
+.content {
+  margin-top: 40px;            
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+
+.angular-logo {
+    max-width: 9.2rem;
+  }
+
+/*
+.content h1 {
+    margin-top: 1.75rem;
+  }
+
+.content p {
+    margin-top: 1.5rem;
+  }
+
+.divider {
+    width: 1px;
+    background: var(--red-to-pink-to-purple-vertical-gradient);
+    margin-inline: 0.5rem;
+  }
+
+.pill-group {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+  }
+
+.pill {
+    display: flex;
+    align-items: center;
+    --pill-accent: var(--bright-blue);
+    background: color-mix(in srgb, var(--pill-accent) 5%, transparent);
+    color: var(--pill-accent);
+    padding-inline: 0.75rem;
+    padding-block: 0.375rem;
+    border-radius: 2.75rem;
+    border: 0;
+    transition: background 0.3s ease;
+    font-family: var(--inter-font);
+    font-size: 0.875rem;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 1.4rem;
+    letter-spacing: -0.00875rem;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+.pill:hover {
+    background: color-mix(in srgb, var(--pill-accent) 15%, transparent);
+  }
+
+.pill-group .pill:nth-child(6n + 1) {
+    --pill-accent: var(--bright-blue);
+  }
+.pill-group .pill:nth-child(6n + 2) {
+    --pill-accent: var(--electric-violet);
+  }
+.pill-group .pill:nth-child(6n + 3) {
+    --pill-accent: var(--french-violet);
+  }
+
+.pill-group .pill:nth-child(6n + 4),
+  .pill-group .pill:nth-child(6n + 5),
+  .pill-group .pill:nth-child(6n + 6) {
+    --pill-accent: var(--hot-red);
+  }
+
+  .pill-group svg {
+    margin-inline-start: 0.25rem;
+  }
+
+  .social-links {
+    display: flex;
+    align-items: center;
+    gap: 0.73rem;
+    margin-top: 1.5rem;
+  }
+
+  .social-links path {
+    transition: fill 0.3s ease;
+    fill: var(--gray-400);
+  }
+
+  .social-links a:hover svg path {
+    fill: var(--gray-900);
+  }
+
+  @media screen and (max-width: 650px) {
+    .content {
+      flex-direction: column;
+      width: max-content;
+    }
+
+    .divider {
+      height: 1px;
+      width: 100%;
+      background: var(--red-to-pink-to-purple-horizontal-gradient);
+      margin-block: 1.5rem;
+    }
+  }
+*/

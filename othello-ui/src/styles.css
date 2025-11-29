@@ -1,0 +1,26 @@
+/* You can add global styles to this file, and also import other style files */
+
+@import "tailwindcss";
+
+body {
+  margin: 0;
+  padding: 0;
+
+  background: linear-gradient(
+    135deg,
+    #59fb84,
+    #76ffd1,
+    #a1c7c4,
+    #76ffd1,
+    #59fb84
+  );
+
+  background-size: 500% 500%;
+  animation: gradientMove 5s ease-in-out infinite;
+}
+
+@keyframes gradientMove {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 90% 50%; }
+  100% { background-position: 0% 50%; }
+}
