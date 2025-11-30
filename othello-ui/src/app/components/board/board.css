@@ -4,7 +4,7 @@
   grid-template-rows: repeat(8, 60px);
   gap: 4px;
   justify-content: center;
-  margin-top: 40px;
+  margin-top: 25px;
 }
 
 .square {
