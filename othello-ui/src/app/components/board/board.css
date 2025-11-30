@@ -1,34 +1,31 @@
 .board-container {
   display: grid;
-  grid-template-rows: repeat(8, 60px);
-  gap: 6px;
-}
-
-.row {
-  display: grid;
   grid-template-columns: repeat(8, 60px);
-  gap: 6px;
+  grid-template-rows: repeat(8, 60px);
+  gap: 4px;
+  justify-content: center;
+  margin-top: 40px;
 }
 
 .square {
   width: 60px;
   height: 60px;
-  background: linear-gradient(135deg, #084310, #189e1a, #a2ff00);
+  background: linear-gradient(135deg, #084310,#189e1a, #a2ff00);
   border-radius: 6px;
   display: flex;
   justify-content: center;
   align-items: center;
+  transition: 0.15s;
   cursor: pointer;
-  transition: 0.15s ease;
 }
 
 .square:hover {
-  transform: scale(1.1);
+  transform: scale(1.07);
 }
 
-.piece.white, .piece.black {
-  width: 45px;
-  height: 45px;
+.piece {
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
 }
 

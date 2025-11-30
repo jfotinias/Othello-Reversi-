@@ -1,17 +1,15 @@
 <div class="board-container">
-  <div class="row" *ngFor="let row of board; let i = index">
+  <div
+    class="square"
+    *ngFor="let cell of boardFlat; let index = index"
+    (click)="onCellClick(getRow(index), getCol(index))"
+  >
     <div
-      class="square"
-      *ngFor="let cell of row; let j = index"
-      (click)="onCellClick(i, j)"
-    >
-      <div
-        class="piece"
-        [ngClass]="{
-          white: cell === 1,
-          black: cell === -1
-        }"
-      ></div>
-    </div>
+      class="piece"
+      [ngClass]="{
+        white: cell === 1,
+        black: cell === -1
+      }"
+    ></div>
   </div>
 </div>
