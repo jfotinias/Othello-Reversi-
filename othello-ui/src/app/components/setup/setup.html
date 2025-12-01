@@ -1,0 +1,38 @@
+<div class="setup-container">
+    <h2>🎯 Επιλογή Ρυθμίσεων</h2>
+
+    <div class="color-selection">
+        <h3>1. Διάλεξε Χρώμα:</h3>
+        <button 
+            [class.selected]="selectedColor === 'B'" 
+            (click)="selectedColor = 'B'">
+            ⚫ Μαύρο (Παίζεις Πρώτος)
+        </button>
+        <button 
+            [class.selected]="selectedColor === 'W'" 
+            (click)="selectedColor = 'W'">
+            ⚪ Λευκό (Ο AI παίζει πρώτος)
+        </button>
+    </div>
+
+    <div class="depth-selection">
+        <h3>2. Δύσκολο Βάθος AI: ({{ selectedDepth }})</h3>
+        <input 
+            type="range" 
+            min="1" 
+            max="6" 
+            step="1" 
+            [(ngModel)]="selectedDepth" 
+            class="slider">
+        <div class="slider-labels">
+            <span>1 (Εύκολο)</span>
+            <span>6 (Δύσκολο)</span>
+        </div>
+    </div>
+    
+    <button 
+        class="start-button" 
+        (click)="startGame()">
+        ▶️ Έναρξη Παιχνιδιού
+    </button>
+</div>

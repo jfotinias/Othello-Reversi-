@@ -8,6 +8,10 @@
   <div class="message-box">
     <strong>Κατάσταση:</strong> {{ message }}
   </div>
-  <app-board (messageEvent)="handleBoardMessage($event)"></app-board>
+  <hr>
+
+  <app-setup *ngIf="!gameStarted" (setupCompleted)="handleSetup($event)">
+  </app-setup>
+  <app-board *ngIf="gameStarted" (messageEvent)="handleBoardMessage($event)"></app-board>
 </main>
 

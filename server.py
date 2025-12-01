@@ -15,13 +15,8 @@ app.add_middleware(
 )
 
 game = Board()
-# Ορίζουμε τον άνθρωπο (human) ως Μαύρο (B) και τον AI ως Λευκό (W)
-# B = -1, W = 1
-HUMAN_COLOR = Board.B
-AI_COLOR = Board.W
-AI_DEPTH = 7 # Χρησιμοποιούμε σταθερό βάθος
-human = HumanPlayer(HUMAN_COLOR)
-ai = AIPlayer(AI_COLOR, AI_DEPTH)
+ai = None
+human = None
 
 # ------ Setup Request ------
 class SetupRequest(BaseModel):
@@ -81,7 +76,7 @@ def make_move(data: MoveRequest):
         raise HTTPException(status_code=403, detail="Δεν είναι η σειρά σας να παίξετε. Περιμένετε τον AI.")
 
     # 2. Έλεγχος διαθέσιμων κινήσεων
-    moves = game.available_moves_for(human.player_letter)
+    moves = game.available_moves()
     if not moves:
         # Αυτό δεν πρέπει να συμβεί, καθώς το frontend πρέπει να το ελέγχει
         raise HTTPException(status_code=400, detail="Δεν έχετε διαθέσιμες κινήσεις (Πάσο).")
@@ -104,10 +99,11 @@ def make_move(data: MoveRequest):
         if not ai_has_moves:             
              # Η make_move έχει ήδη ενημερώσει το last_player = human.player_letter.
              # Αν ο AI κάνει πάσο, η σειρά παραμένει στον άνθρωπο, οπότε το last_player παραμένει σωστό.
-             message = "Η κίνηση σας έγινε. Ο AI έκανε πάσο. Παίζετε ξανά!"
+            message = "Η κίνηση σας έγινε. Ο AI έκανε πάσο. Παίζετε ξανά!"
+            game.change_last_player()
              
              # Ενημερώνουμε το frontend ότι η σειρά του AI τελείωσε.
-             return {
+            return {
                 "message": message,
                 "board": game.Board,
                 "human_move": (data.row, data.col),
@@ -136,13 +132,12 @@ def ai_turn():
         raise HTTPException(status_code=403, detail="Δεν είναι η σειρά του AI να παίξει.")
         
     # 2. Κίνηση AI (Minimax)    
-    if not game.available_moves_for(ai.player_letter):
+    if not game.available_moves():
         # Ο AI κάνει πάσο
         ai_move = None
         message = "Ο AI έκανε πάσο."
-        # Η σειρά πάει στον αντίπαλο (Άνθρωπο).
-        game.change_last_player() # <-- ΠΡΟΣΘΗΚΗ: Ενημερώνουμε ότι ο άνθρωπος έπαιξε τελευταίος.
-                                  # Αυτό κάνει τον last_player = human.player_letter.
+        game.change_last_player()  # Αλλάζουμε σειρά στον άνθρωπο
+        
     else:
         # Ο AI παίζει κανονικά
         ai_move = ai.choose_move(game)
@@ -151,16 +146,16 @@ def ai_turn():
             r, c = ai_move
             game.make_move(r, c, ai.player_letter)
             message = "Ο AI έπαιξε."
+
         else:
             # Σπάνια περίπτωση, αλλά αν συμβεί, θεωρούμε πάσο και αλλάζουμε σειρά.
             ai_move = None
             message = "Ο AI έκανε πάσο (Minimax)."
             game.change_last_player() # <-- ΠΡΟΣΘΗΚΗ
 
-
-    # 3. Τελικός Έλεγχος
+    # 3. Έλεγχος Τέλος Παιχνιδιού
     if game.is_terminal():
-         message = "Το παιχνίδι τελείωσε."
+        message = "Το παιχνίδι τελείωσε."
 
     return {
         "message": message,
