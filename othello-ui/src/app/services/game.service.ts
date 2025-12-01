@@ -29,6 +29,10 @@ export class GameService {
     });
   }
 
+  aiTurn(): Observable<any> {
+    return this.http.post(`${this.apiUrl}/ai_turn/`, {});
+  }
+
   reset(): Observable<any> {
     return this.http.post(`${this.apiUrl}/reset`, {});
   }

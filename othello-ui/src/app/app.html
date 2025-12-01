@@ -5,6 +5,9 @@
       <h2>OTHELLO</h2>
     </div>
   </div>
-  <app-board></app-board>
+  <div class="message-box">
+    <strong>Κατάσταση:</strong> {{ message }}
+  </div>
+  <app-board (messageEvent)="handleBoardMessage($event)"></app-board>
 </main>
 

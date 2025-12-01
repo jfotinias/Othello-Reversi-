@@ -142,11 +142,11 @@ class Board:
         return list(set(valid_moves))
     
     def make_move(self, row, col, letter):
-        self.Board[row][col] = letter
-        self.last_move = Move(row, col)
-
         current_player = letter
         opponent = self.last_player
+        
+        self.Board[row][col] = letter
+        self.last_move = Move(row, col)
 
         for path in self.get_lines(row, col):
             if len(path) < 2:
