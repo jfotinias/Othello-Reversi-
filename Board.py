@@ -11,7 +11,7 @@ class Board:
         self.last_move = Move()
         self.last_player = self.W
         self.Board = [[self.EMPTY for _ in range(8)] for _ in range(8)]
-        # αρχική θέση Othello
+        # αρχική θέση Othello        
         self.Board[3][3] = self.W
         self.Board[4][4] = self.W
         self.Board[3][4] = self.B

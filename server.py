@@ -75,51 +75,39 @@ def make_move(data: MoveRequest):
     if player_to_move != human.player_letter:
         raise HTTPException(status_code=403, detail="Δεν είναι η σειρά σας να παίξετε. Περιμένετε τον AI.")
 
-    # 2. Έλεγχος διαθέσιμων κινήσεων
-    moves = game.available_moves()
-    if not moves:
-        # Αυτό δεν πρέπει να συμβεί, καθώς το frontend πρέπει να το ελέγχει
-        raise HTTPException(status_code=400, detail="Δεν έχετε διαθέσιμες κινήσεις (Πάσο).")
-
-    # 3. Έλεγχος Εγκυρότητας Κίνησης (όπως πριν)
-    if not game.is_valid_move(data.row, data.col):
-        raise HTTPException(status_code=400, detail="Άκυρη κίνηση: Δεν είναι έγκυρη θέση.")
-    
-    # 4. Εκτέλεση Κίνησης
-    game.make_move(data.row, data.col, human.player_letter)
-
-    # 5. Έλεγχος Τέλος Παιχνιδιού
+    # --- 2. ΕΛΕΓΧΟΣ ΑΝ ΤΟ ΠΑΙΧΝΙΔΙ ΕΧΕΙ ΤΕΛΕΙΩΣΕΙ ---
     if game.is_terminal():
-        message = "Το παιχνίδι τελείωσε."
+        raise HTTPException(status_code=400, detail="Το παιχνίδι έχει ήδη τελειώσει.")
+    
+    human_move = (data.row, data.col)
+    message = ""
+
+    # 3. --- Έλεγχος Εγκυρότητας Κίνησης ---
+    if not game.is_valid_move(data.row, data.col):
+        raise HTTPException(status_code=400, detail=" Δεν είναι έγκυρη θέση.")
+    
+    human_has_moves = game.available_moves_for(human.player_letter)
+    if human_has_moves:
+        game.make_move(data.row, data.col, human.player_letter)
     else:
-        # 6. Ο επόμενος παίκτης είναι ο AI.
-        # Ελέγχουμε αν ο AI έχει κινήσεις. Αν όχι, η σειρά επιστρέφει στον άνθρωπο.
-        ai_has_moves = game.available_moves_for(ai.player_letter)
+        human_move = None # Ο άνθρωπος κάνει πάσο
+        game.change_last_player()  # Αλλάζουμε σειρά στον AI
+
+    if game.is_terminal():
+        return {
+            "message": "Το παιχνίδι τελείωσε.",
+            "board": game.Board,
+            "human_move": human_move,
+            "next_player_is_ai": False # <-- Το παιχνίδι τελείωσε, δεν έχει σειρά κανείς
+        }
+    else:
+        return {
+            "message": "Η κίνηση του ανθρώπου έγινε.",  
+            "board": game.Board,
+            "human_move": human_move,
+            "next_player_is_ai": True # <-- Η σειρά είναι του AI    
+        }
         
-        if not ai_has_moves:             
-             # Η make_move έχει ήδη ενημερώσει το last_player = human.player_letter.
-             # Αν ο AI κάνει πάσο, η σειρά παραμένει στον άνθρωπο, οπότε το last_player παραμένει σωστό.
-            message = "Η κίνηση σας έγινε. Ο AI έκανε πάσο. Παίζετε ξανά!"
-            game.change_last_player()
-             
-             # Ενημερώνουμε το frontend ότι η σειρά του AI τελείωσε.
-            return {
-                "message": message,
-                "board": game.Board,
-                "human_move": (data.row, data.col),
-                "next_player_is_ai": False # <-- Ο AI ΔΕΝ παίζει, η σειρά είναι ξανά του ανθρώπου
-            }
-
-        # Αν ο AI έχει κινήσεις, η σειρά του AI ξεκινάει.
-        message = "Η κίνηση σας έγινε. Περιμένουμε τον AI..."
-
-    # 7. Επιστρέφουμε την κατάσταση μετά την κίνηση του ανθρώπου (ο AI έχει σειρά τώρα)
-    return {
-        "message": message,
-        "board": game.Board,
-        "human_move": (data.row, data.col),
-        "next_player_is_ai": True # <-- Ο AI έχει σειρά
-    }
 # ------ AI Turn Endpoint ------
 
 @app.post("/ai_turn/")
@@ -131,10 +119,20 @@ def ai_turn():
     if player_to_move != ai.player_letter:
         raise HTTPException(status_code=403, detail="Δεν είναι η σειρά του AI να παίξει.")
         
+    # --- 2. ΕΛΕΓΧΟΣ ΑΝ ΤΟ ΠΑΙΧΝΙΔΙ ΕΧΕΙ ΤΕΛΕΙΩΣΕΙ ---
+    if game.is_terminal():
+        # Αυτό δεν θα πρέπει να συμβεί αν λειτουργεί σωστα το make_move αλλά είναι ένα πρόσθετο μέτρο ασφαλείας.
+        raise HTTPException(status_code=400, detail="Το παιχνίδι έχει ήδη τελειώσει.")
+    
+
+    ai_move = None
+    message = ""
+
+    ai_has_moves = game.available_moves_for(ai.player_letter)
+
     # 2. Κίνηση AI (Minimax)    
-    if not game.available_moves():
+    if not ai_has_moves:
         # Ο AI κάνει πάσο
-        ai_move = None
         message = "Ο AI έκανε πάσο."
         game.change_last_player()  # Αλλάζουμε σειρά στον άνθρωπο
         
@@ -146,7 +144,6 @@ def ai_turn():
             r, c = ai_move
             game.make_move(r, c, ai.player_letter)
             message = "Ο AI έπαιξε."
-
         else:
             # Σπάνια περίπτωση, αλλά αν συμβεί, θεωρούμε πάσο και αλλάζουμε σειρά.
             ai_move = None
@@ -156,13 +153,29 @@ def ai_turn():
     # 3. Έλεγχος Τέλος Παιχνιδιού
     if game.is_terminal():
         message = "Το παιχνίδι τελείωσε."
-
-    return {
-        "message": message,
-        "ai_move": ai_move,
-        "board": game.Board,
-        "next_player_is_ai": game.last_player != human.player_letter # <-- Ελέγχουμε ποιος έχει σειρά τώρα
-    }
+        return {
+            "message": message, 
+            "ai_move": ai_move,
+            "board": game.Board,
+            "next_player_is_ai": False # <-- Το παιχνίδι τελείωσε, δεν έχει σειρά κανείς
+        }
+    else:
+        human_has_moves = game.available_moves_for(human.player_letter)
+        if not human_has_moves:
+            game.change_last_player()          
+            return {
+            "message": message, 
+            "ai_move": ai_move,
+            "board": game.Board,
+            "next_player_is_ai": True
+            }
+        else:        
+            return {
+            "message": message, 
+            "ai_move": ai_move,
+            "board": game.Board,
+            "next_player_is_ai": False # <-- Η σειρά είναι του ανθρώπου    
+        }
 
 # ------ Reset Endpoint ------
 @app.post("/reset")

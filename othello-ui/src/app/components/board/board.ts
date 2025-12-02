@@ -1,8 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { GameService } from '../../services/game.service';
-
-// Καθυστέρηση για οπτικό εφέ (προαιρετικό)
 import { delay } from 'rxjs/operators';
 
 @Component({
@@ -57,32 +55,43 @@ loadBoard() {
   });
 }
 
+handleAiChain(): void {
+    // Εμφανίζουμε μήνυμα σκέψης πριν την καθυστέρηση
+    this.messageEvent.emit("Ο AI σκέφτεται...");
+
+    this.gameService.aiTurn().pipe(delay(2000)).subscribe({
+        next: (aiResponse: any) => {
+            this.messageEvent.emit(aiResponse.message);
+            this.loadBoard();
+
+            //  ΚΡΙΣΙΜΟΣ ΕΛΕΓΧΟΣ: Εάν ο AI πρέπει να παίξει ξανά
+            if (aiResponse.next_player_is_ai && aiResponse.message !== "Το παιχνίδι τελείωσε.") {
+                //  Αναδρομική κλήση: Ο AI παίζει αμέσως ξανά
+                this.handleAiChain(); 
+            }
+            // Αν το παιχνίδι τελείωσε, η αλυσίδα σταματά
+        },
+        error: (aiErr) => {
+            this.messageEvent.emit("Σφάλμα στην κίνηση AI: " + (aiErr.error?.detail || ""));
+        }
+    });
+}
+
 onCellClick(i: number, j: number) {
-  this.gameService.makeMove(i, j).subscribe({
+   this.gameService.makeMove(i, j).subscribe({
       next: (humanResponse: any) => {
-      
+ 
       // 1. Ενημέρωση UI με την κίνηση του ανθρώπου
       this.messageEvent.emit(humanResponse.message);
       this.loadBoard();
       
       // Αν το παιχνίδι δεν τελείωσε και έχει σειρά ο AI:
-      if (humanResponse.message !== "Το παιχνίδι τελείωσε." && humanResponse.next_player_is_ai) {
-        
-        // 2. Ζητάμε την κίνηση του AI μετά από μια μικρή καθυστέρηση
-        this.gameService.aiTurn().pipe(delay(500)).subscribe({ 
-          next: (aiResponse: any) => {
-            // 3. Ενημέρωση UI με την κίνηση του AI
-            this.messageEvent.emit(aiResponse.message);
-            this.loadBoard();
-          },
-          error: (aiErr) => {
-            this.messageEvent.emit("Σφάλμα στην κίνηση AI: " + aiErr.error?.detail);
-          }
-        });
+      if (humanResponse.message !== "Το παιχνίδι τελείωσε." && humanResponse.next_player_is_ai) {  
+        this.handleAiChain();
       }
     },
     error: (humanErr) => {
-      this.messageEvent.emit("⚠️ Άκυρη κίνηση: " + humanErr.error?.detail);
+    this.messageEvent.emit("⚠️ Άκυρη κίνηση: " + humanErr.error?.detail);
     }
   });
 }
