@@ -1,7 +1,7 @@
 /* ------------------ Layout ------------------ */
 main {
   width: 100%;
-  display: flex;
+  display: flex; 
   flex-direction: column;
   align-items: center;
 }
@@ -81,14 +81,63 @@ main {
   }
 }
 
-/* ------------------ Board Container ------------------ */
+/* ------------------ App-Setup ------------------ */
 
-.content {
-  margin-top: 40px;            
-  display: flex;
-  justify-content: center;
-  width: 100%;
+app-setup {
+  width: 33%;
 }
+
+/* ------------------ App-Board ------------------ */
+
+app-board {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+/* ------------------ Message-Box ------------------ */
+
+.message-box {
+  margin: 20px;
+  text-align: center;
+}
+
+/* ------------------ Wrapper ------------------ */
+
+.game-content-wrapper {
+    display: flex;
+    /* Ορίζουμε ένα μέγιστο πλάτος για όλο το περιεχόμενο του παιχνιδιού */
+    max-width: 900px; 
+    width: 100%;
+    justify-content: center;
+    align-items: flex-start; /* Ευθυγράμμιση στην κορυφή */
+    gap: 30px; /* Απόσταση μεταξύ του score box και του πίνακα */
+}
+
+.score-placeholder {
+    /* Πρέπει να είναι το ίδιο πλάτος με το .final-score-box */
+    width: 200px; 
+    min-width: 200px;
+    height: auto; 
+    display: flex;
+    flex-direction: column; /* Για να κεντράρει το score box αν είναι μικρότερο */
+}
+
+.final-score-box {
+    /* Δίνουμε στο score box ένα σταθερό, μικρό πλάτος */
+    width: 100%; 
+    min-width: 180px;
+    padding: 15px;
+    margin: 0;
+    background-color: #12551e; /* Σκούρο πράσινο */
+    border: 2px solid #a2ff00;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    color: #e0ffe0;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+}
+
 
 .angular-logo {
     max-width: 9.2rem;

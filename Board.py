@@ -196,6 +196,13 @@ class Board:
         if len(self.available_moves()) == 0 and len(self.copy_change_last_player().available_moves()) == 0:
             return True
         return False
+    
+
+    def get_scores(self):
+        whites = sum(row.count(self.W) for row in self.Board)
+        blacks = sum(row.count(self.B) for row in self.Board)
+        return {"W": whites, "B": blacks}
+
         
     def evaluate_piece_diff(self, player):
         opponent = self.W if player == self.B else self.B

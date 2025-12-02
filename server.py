@@ -46,18 +46,32 @@ def setup_game(data: SetupRequest):
         "ai_color": "B" if data.human_color.upper() == "W" else "W",
         "depth": data.depth}
 
-
 # ------ State Endpoint ------
 @app.get("/state")
 def get_state():
-    return {
+    # Βασικά δεδομένα κατάστασης
+    state = {
         "board": game.Board,
         "last_move": (
             game.last_move.row,
             game.last_move.col
         ) if game.last_move else None,
-        "last_player": game.last_player
+        "last_player": game.last_player,
+        "available_moves": game.available_moves() if game.last_player == ai.player_letter else None
     }
+    
+    # Εάν το παιχνίδι τελείωσε, υπολογίζουμε τα σκορ και προσθέτουμε το message
+    if game.is_terminal():
+        scores = game.get_scores() # <-- ΚΑΛΟΥΜΕ ΤΟΝ ΥΠΟΛΟΓΙΣΜΟ ΣΚΟΡ
+        
+        # Υπολογισμός νικητή
+        winner = "W" if scores["W"] > scores["B"] else ("B" if scores["B"] > scores["W"] else "Ισοπαλία")
+        
+        # ❗ ΠΡΟΣΘΗΚΗ: Τα σκορ και το τελικό μήνυμα
+        state["scores"] = scores 
+        state["message"] = f"🏁 Τέλος παιχνιδιού! Νικητής: {winner} (B: {scores['B']} vs W: {scores['W']})"
+        
+    return state
 
 
 # ------ Make Move Endpoint ------
@@ -94,10 +108,15 @@ def make_move(data: MoveRequest):
         game.change_last_player()  # Αλλάζουμε σειρά στον AI
 
     if game.is_terminal():
+        scores = game.get_scores()
+        
+        winner = "W" if scores["W"] > scores["B"] else ("B" if scores["B"] > scores["W"] else "Ισοπαλία")
+        message = f"Τέλος παιχνιδιού! Νικητής: {winner} (B: {scores['B']} vs W: {scores['W']})"
         return {
-            "message": "Το παιχνίδι τελείωσε.",
+            "message": message,
             "board": game.Board,
             "human_move": human_move,
+            "scores": scores,
             "next_player_is_ai": False # <-- Το παιχνίδι τελείωσε, δεν έχει σειρά κανείς
         }
     else:
@@ -152,11 +171,14 @@ def ai_turn():
 
     # 3. Έλεγχος Τέλος Παιχνιδιού
     if game.is_terminal():
-        message = "Το παιχνίδι τελείωσε."
+        scores = game.get_scores()
+        winner = "W" if scores["W"] > scores["B"] else ("B" if scores["B"] > scores["W"] else "Ισοπαλία")
+        message = f"Τέλος παιχνιδιού! Νικητής: {winner} (B: {scores['B']} vs W: {scores['W']})"
         return {
             "message": message, 
             "ai_move": ai_move,
             "board": game.Board,
+            "scores": scores,
             "next_player_is_ai": False # <-- Το παιχνίδι τελείωσε, δεν έχει σειρά κανείς
         }
     else:

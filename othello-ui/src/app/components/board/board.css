@@ -1,15 +1,14 @@
 .board-container {
   display: grid;
-  grid-template-columns: repeat(8, 60px);
-  grid-template-rows: repeat(8, 60px);
+  grid-template-columns: repeat(8, 55px);
+  grid-template-rows: repeat(8, 55px);
   gap: 4px;
   justify-content: center;
-  margin-top: 25px;
 }
 
 .square {
-  width: 60px;
-  height: 60px;
+  width: 55px;
+  height: 55px;
   background: linear-gradient(135deg, #084310,#189e1a, #a2ff00);
   border-radius: 6px;
   display: flex;
@@ -21,6 +20,13 @@
 
 .square:hover {
   transform: scale(1.08);
+}
+
+.square.valid-move-border {
+    border: 3px solid #a2ff00; /* Φωτεινό, ορατό περίγραμμα */
+    box-shadow: 0 0 12px rgba(162, 255, 0, 0.9); /* Φωτεινό glow */
+    background: linear-gradient(135deg, #000000,#084310, #189e1a);
+    transform: scale(1.01); /* Ελαφρύ εφέ για να ξεχωρίζει */
 }
 
 .piece {

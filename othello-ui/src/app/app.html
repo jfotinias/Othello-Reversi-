@@ -10,8 +10,21 @@
   </div>
   <hr>
 
+  <div class="game-content-wrapper">       
+    <div class="score-placeholder">
+      <div *ngIf="finalScores" class="final-score-box">
+        <h3>ΤΕΛΙΚΑ ΣΚΟΡ</h3>
+        <button (click)="resetGame()" class="reset-button">
+          Νέο Παιχνίδι / Reset
+        </button>
+      </div>
+    </div>
+        
+    <app-board *ngIf="gameStarted" (messageEvent)="handleBoardMessage($event)" (gameEndEvent)="handleGameEnd($event)">
+    </app-board>      
+  </div>
+
   <app-setup *ngIf="!gameStarted" (setupCompleted)="handleSetup($event)">
   </app-setup>
-  <app-board *ngIf="gameStarted" (messageEvent)="handleBoardMessage($event)"></app-board>
+  
 </main>
-

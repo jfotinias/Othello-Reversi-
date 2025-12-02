@@ -22,28 +22,29 @@ export class App implements OnInit { // Αυτό είναι τώρα σωστό
   constructor(private gameService: GameService) {}
 
   requestAiTurn(): void {
-      // Εμφανίζουμε μήνυμα σκέψης πριν την καθυστέρηση
-      this.message = "Ο AI σκέφτεται...";
-  
-      this.gameService.aiTurn().pipe(delay(1000)).subscribe({
-          next: (aiResponse: any) => {
+    this.message = "Ο AI σκέφτεται...";
+    
+    this.gameService.aiTurn().pipe(delay(1000)).subscribe({
+        next: (aiResponse: any) => {
             
-          this.handleBoardMessage(aiResponse.message);
-
-          if (this.boardComponent) { // Έλεγχος για ασφάλεια
-                  this.boardComponent.loadBoard(); 
-              }
-              //  ΚΡΙΣΙΜΟΣ ΕΛΕΓΧΟΣ: Εάν ο AI πρέπει να παίξει ξανά
-          if (aiResponse.next_player_is_ai) {
-                  //  Αναδρομική κλήση: Ο AI παίζει αμέσως ξανά
-              this.requestAiTurn(); 
+            // 1. ΕΚΠΕΜΨΗ ΤΟΥ ΜΗΝΥΜΑΤΟΣ ΕΠΙΤΥΧΙΑΣ ΤΟΥ AI
+            this.handleBoardMessage(aiResponse.message); 
+            
+            // 2. ❗ ΑΝΑΝΕΩΣΗ ΠΙΝΑΚΑ (Απαραίτητο βήμα)
+            if (this.boardComponent) {
+                this.boardComponent.loadBoard(); 
             }
-              // Αν το παιχνίδι τελείωσε, η αλυσίδα σταματά
-          },
-          error: (err) => {
-             this.handleBoardMessage("Σφάλμα στην κίνηση AI: " + (err.error?.detail || err.message));
+            
+            // 3. Αναδρομή
+            if (aiResponse.next_player_is_ai) {
+                 this.requestAiTurn(); 
+            }
+        },
+        error: (err) => {
+             // 4. ΧΕΙΡΙΣΜΟΣ ΠΡΑΓΜΑΤΙΚΩΝ ΣΦΑΛΜΑΤΩΝ API
+             this.handleBoardMessage("⚠️ Σφάλμα στην κίνηση AI: " + (err.error?.detail || err.message));
         }
-      });
+    });
   }
 // Νέα Μέθοδος που καλείται από το SetupComponent
   handleSetup(data: { color: 'W' | 'B', depth: number }): void {
@@ -70,7 +71,37 @@ export class App implements OnInit { // Αυτό είναι τώρα σωστό
     // Εδώ θα έμπαινε κώδικας που εκτελείται μία φορά μετά την αρχικοποίηση του component
   }
 
-  handleBoardMessage(msg: string): void {
+  finalScores: {W: number, B: number} | null = null;
+
+  handleBoardMessage(msg: string, scores: {W: number, B: number} | null = null): void {
     this.message = msg;
+    this.finalScores = scores;
+  }
+
+  handleGameEnd(event: { message: string, scores: any }): void {
+    this.message = event.message;
+    this.finalScores = event.scores; // Αυτό θα κάνει το div ορατό!
+    
+    // (Βεβαιωθείτε ότι το handleBoardMessage(msg) δεν μηδενίζει το finalScores)
+  }
+
+  resetGame(): void {
+    // 1. Καλούμε το reset endpoint
+    this.gameService.reset().subscribe({
+        next: () => {
+            // 2. Επαναφέρουμε την κατάσταση του UI/παιχνιδιού
+            this.gameStarted = false;
+            this.finalScores = null;
+            this.message = 'Διάλεξε ρυθμίσεις και πάτα Έναρξη.';
+            
+            // 3. (Προαιρετικό) Καλεί το loadBoard του BoardComponent για να καθαρίσει τον πίνακα
+            if (this.boardComponent) {
+                 this.boardComponent.loadBoard(); 
+            }
+        },
+        error: (err) => {
+            this.message = "Αποτυχία reset: " + err.message;
+        }
+    });
   }
 }

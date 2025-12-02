@@ -1,11 +1,15 @@
 <div class="board-container">
-  <div
+  <div 
     class="square"
     *ngFor="let cell of boardFlat; let index = index"
     (click)="onCellClick(getRow(index), getCol(index))"
+    [ngClass]="{
+        'valid-move-border': isMoveAvailable(getRow(index), getCol(index)) && cell === 0 
+    }"
   >
-    <div
+    <div 
       class="piece"
+      *ngIf="cell !== 0"
       [ngClass]="{
         white: cell === 1,
         black: cell === -1

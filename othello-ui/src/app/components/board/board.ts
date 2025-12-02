@@ -2,6 +2,7 @@ import { Component, OnInit, ChangeDetectorRef, EventEmitter, Output } from '@ang
 import { CommonModule } from '@angular/common';
 import { GameService } from '../../services/game.service';
 import { delay } from 'rxjs/operators';
+import { lastValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-board',
@@ -22,6 +23,7 @@ export class Board implements OnInit {
   private cdr: ChangeDetectorRef
 ) {}
 
+  available_moves: [number, number][] = [];
 
   getRow(index: number): number {
   return Math.floor(index / 8);
@@ -36,63 +38,112 @@ export class Board implements OnInit {
     this.loadBoard();
   }
 
-loadBoard() {
+loadBoard(): Promise<void> { // Τώρα επιστρέφει Promise
   console.log("Before API call → boardFlat:", this.boardFlat);
 
-  this.gameService.getState().subscribe({
-    next: (state: any) => {
-      console.log("API returned:", state);
+  // Δημιουργούμε ένα νέο Promise που θα επιλυθεί (resolve) όταν ολοκληρωθεί το subscribe.
+  return new Promise((resolve, reject) => {
+    this.gameService.getState().subscribe({
+      next: (state: any) => {
+        
+        // 1. Ενημέρωση state (όπως πριν)
+        this.board = state.board;
+        this.boardFlat = this.board.flat();
+        this.available_moves = state.available_moves || [];
 
-      this.board = state.board;
-      this.boardFlat = this.board.flat();
-
-      console.log("After flatten →", this.boardFlat);
-      this.cdr.detectChanges();  
-    },
-    error: err => {
-      console.error("API ERROR:", err);
-    }
-  });
-}
-
-handleAiChain(): void {
-    // Εμφανίζουμε μήνυμα σκέψης πριν την καθυστέρηση
-    this.messageEvent.emit("Ο AI σκέφτεται...");
-
-    this.gameService.aiTurn().pipe(delay(2000)).subscribe({
-        next: (aiResponse: any) => {
-            this.messageEvent.emit(aiResponse.message);
-            this.loadBoard();
-
-            //  ΚΡΙΣΙΜΟΣ ΕΛΕΓΧΟΣ: Εάν ο AI πρέπει να παίξει ξανά
-            if (aiResponse.next_player_is_ai && aiResponse.message !== "Το παιχνίδι τελείωσε.") {
-                //  Αναδρομική κλήση: Ο AI παίζει αμέσως ξανά
-                this.handleAiChain(); 
-            }
-            // Αν το παιχνίδι τελείωσε, η αλυσίδα σταματά
-        },
-        error: (aiErr) => {
-            this.messageEvent.emit("Σφάλμα στην κίνηση AI: " + (aiErr.error?.detail || ""));
-        }
-    });
-}
-
-onCellClick(i: number, j: number) {
-   this.gameService.makeMove(i, j).subscribe({
-      next: (humanResponse: any) => {
- 
-      // 1. Ενημέρωση UI με την κίνηση του ανθρώπου
-      this.messageEvent.emit(humanResponse.message);
-      this.loadBoard();
-      
-      // Αν το παιχνίδι δεν τελείωσε και έχει σειρά ο AI:
-      if (humanResponse.message !== "Το παιχνίδι τελείωσε." && humanResponse.next_player_is_ai) {  
-        this.handleAiChain();
+        this.cdr.detectChanges();  
+        resolve(); // Επιλύουμε το Promise: Η φόρτωση ολοκληρώθηκε!
+      },
+      error: err => {
+        console.error("API ERROR:", err);
+        reject(err); // Απορρίπτουμε το Promise αν υπάρχει σφάλμα
       }
-    },
-    error: (humanErr) => {
-    this.messageEvent.emit("⚠️ Άκυρη κίνηση: " + humanErr.error?.detail);
-    }
+    });
   });
 }
+
+//  Ελέγχει αν οι συντεταγμένες αντιστοιχούν σε έγκυρη κίνηση
+  isMoveAvailable(row: number, col: number): boolean {
+    if (!this.available_moves) return false;
+    // Ελέγχουμε αν υπάρχει έγκυρη κίνηση για αυτές τις συντεταγμένες
+    return this.available_moves.some(move => move[0] === row && move[1] === col);
+  }
+
+async handleAiChain(): Promise<void> { // ❗ Η συνάρτηση γίνεται async
+    
+    this.messageEvent.emit("Ο AI σκέφτεται..."); 
+
+    // 1. ⏰ Εφαρμόζουμε την καθυστέρηση (χρησιμοποιώντας setTimeout για delay)
+    await new Promise(resolve => setTimeout(resolve, 1000)); 
+
+    try {
+        const aiResponse = await lastValueFrom(this.gameService.aiTurn());
+
+        // 2. Ενημέρωση UI με την κίνηση του AI
+        this.messageEvent.emit(aiResponse.message);
+        await this.loadBoard(); // ❗ ΠΕΡΙΜΕΝΟΥΜΕ: Περιμένουμε την ανανέωση
+
+        // 3. Αναδρομή (εάν ο AI πρέπει να παίξει ξανά)
+        if (aiResponse.next_player_is_ai && aiResponse.message !== "Το παιχνίδι τελείωσε.") {
+            await this.handleAiChain(); // ❗ Αναδρομική κλήση με await
+        }
+    } catch (aiErr: any) {
+        this.messageEvent.emit("Σφάλμα στην κίνηση AI: " + (aiErr.error?.detail || ""));
+    }
+}
+
+@Output() gameEndEvent = new EventEmitter<{ message: string, scores: any }>(); // ❗ ΝΕΟ EVENT
+
+async handleGameEnd(): Promise<void> {
+    try {
+        const finalState = await lastValueFrom(this.gameService.getState());
+
+        if (finalState.scores) {
+            // ❗ Εκπέμπουμε τα τελικά δεδομένα στο AppComponent
+            this.gameEndEvent.emit({
+                message: finalState.message,
+                scores: finalState.scores 
+            });
+        }
+    } catch (error) {
+        console.error("Failed to fetch final state:", error);
+    }
+}
+
+async onCellClick(i: number, j: number) {
+    try {
+        const humanResponse = await lastValueFrom(this.gameService.makeMove(i, j));
+
+        // 1. Ενημέρωση UI με την κίνηση του ανθρώπου
+        this.messageEvent.emit(humanResponse.message);
+        await this.loadBoard(); 
+
+        // 2. Εάν το παιχνίδι τελείωσε ΑΜΕΣΩΣ με την κίνηση του ανθρώπου
+        if (humanResponse.message.includes("Τέλος παιχνιδιού")) {
+             // ❗ ΚΑΛΟΥΜΕ το handleGameEnd που θα φέρει τα σκορ.
+             this.handleGameEnd(); 
+             return; 
+        }
+        
+        // 3. Αν η σειρά περνάει στον AI, ξεκινάμε την αλυσίδα
+        if (humanResponse.next_player_is_ai) {    
+             // ❗ Περιμένουμε την αλυσίδα του AI να ολοκληρωθεί
+             await this.handleAiChain();
+        }
+
+        // 4. ΕΛΕΓΧΟΣ: Μήπως το handleAiChain ΤΕΛΕΙΩΣΕ το παιχνίδι;
+        // Το handleAiChain πρέπει να εκπέμπει event gameEndEvent αν τελειώσει το παιχνίδι.
+        // Εάν δεν υπάρχει event, πρέπει να γίνει έλεγχος.
+        
+        // 💡 Εάν η handleAiChain ολοκληρώθηκε, ζητάμε την τελική κατάσταση.
+        const finalState = await lastValueFrom(this.gameService.getState());
+        
+        if (finalState.message && finalState.message.includes("Το παιχνίδι τελείωσε.")) {
+            this.handleGameEnd();
+        }
+
+    } catch (err: any) { 
+        this.messageEvent.emit("⚠️ Άκυρη κίνηση: " + (err.error?.detail || err.message));
+    }
+  }
 }

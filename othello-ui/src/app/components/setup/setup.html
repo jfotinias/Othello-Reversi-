@@ -1,17 +1,17 @@
 <div class="setup-container">
-    <h2>🎯 Επιλογή Ρυθμίσεων</h2>
+    <h2> Επιλογή Ρυθμίσεων</h2>
 
     <div class="color-selection">
         <h3>1. Διάλεξε Χρώμα:</h3>
         <button 
             [class.selected]="selectedColor === 'B'" 
             (click)="selectedColor = 'B'">
-            ⚫ Μαύρο (Παίζεις Πρώτος)
+            ⚫ Μαύρο 
         </button>
         <button 
             [class.selected]="selectedColor === 'W'" 
             (click)="selectedColor = 'W'">
-            ⚪ Λευκό (Ο AI παίζει πρώτος)
+            ⚪ Λευκό 
         </button>
     </div>
 
@@ -23,7 +23,8 @@
             max="6" 
             step="1" 
             [(ngModel)]="selectedDepth" 
-            class="slider">
+            class="slider"
+            [style.background]="trackStyle">
         <div class="slider-labels">
             <span>1 (Εύκολο)</span>
             <span>6 (Δύσκολο)</span>
@@ -33,6 +34,6 @@
     <button 
         class="start-button" 
         (click)="startGame()">
-        ▶️ Έναρξη Παιχνιδιού
+        ▶ Έναρξη Παιχνιδιού
     </button>
 </div>

@@ -1,9 +1,10 @@
 /* Βασικά στυλ για να ταιριάζουν με το background του παιχνιδιού */
 .setup-container {
-    max-width: 450px;
-    margin: 50px auto;
-    padding: 25px;
-    background-color: #12551e; /* Σκούρο/Βαθύ Πράσινο */
+    width: 90%;
+    margin: 20px auto;
+    padding: 7%;
+    background-color: #084310; /* Σκούρο/Βαθύ Πράσινο */
+    border: 3px solid #a2ff00;
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* Σκιά για 3D αίσθηση */
     color: #e0ffe0; /* Ανοιχτό πράσινο/λευκό για το κείμενο */
@@ -11,39 +12,49 @@
     font-family: sans-serif;
 }
 
+h2 {
+    color: #90ee90;
+}
+
 .setup-container h2 {
-    color: #a2ff00; /* Φωτεινό πράσινο */
-    margin-bottom: 25px;
+    margin-bottom: 20px;
 }
 
 /* --- 1. Επιλογή Χρώματος (Buttons) --- */
 .color-selection {
-    margin-bottom: 30px;
-    padding: 15px;
-    border: 1px solid #008000;
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 3px solid #a2ff00;
     border-radius: 8px;
-    background-color: #18712a; /* Ελαφρώς πιο ανοιχτό background */
+    background-color: #189e1a; /* Ελαφρώς πιο ανοιχτό background */
 }
 
 .color-selection button {
-    padding: 10px 20px;
-    margin: 0 10px;
+    width: 275px;
+    padding: 10px;
+    margin: 10px;
     border: 2px solid #a2ff00;
     border-radius: 20px;
     cursor: pointer;
     font-size: 16px;
     font-weight: bold;
     transition: all 0.2s ease-in-out;
-    background-color: #12551e;
+    background-color: #084310;
     color: #e0ffe0;
 }
 
-/* Στυλ για το επιλεγμένο κουμπί (active state) */
+.color-selection button:hover {
+    background-color: #a2ff00; /* Φωτεινό πράσινο φόντο */
+    color: #000; /* Μαύρο κείμενο */
+    transform: scale(1.05);
+    box-shadow: 0 0 10px #000000;
+}
+
 .color-selection button.selected {
     background-color: #a2ff00; /* Φωτεινό πράσινο φόντο */
     color: #000; /* Μαύρο κείμενο */
     transform: scale(1.05);
-    box-shadow: 0 0 10px #a2ff00;
+    box-shadow: 0 0 10px #000000;
 }
 
 /* --- 2. Επιλογή Βάθους (Slider) --- */
@@ -52,30 +63,43 @@
 }
 
 .depth-selection h3 {
-    margin-bottom: 15px;
+    color: #90ee90;
+    margin-bottom: 10px;
 }
 
 /* Στυλ για τη μπάρα (range input) */
 .slider {
     width: 90%;
-    height: 10px;
-    background: #084310; /* Σκούρο πράσινο background της μπάρας */
-    border-radius: 5px;
+    height: 5px;
+    background: #a2ff00; /* Σκούρο πράσινο background της μπάρας */
+    border-radius: 3px;
     appearance: none; /* Αφαίρεση default στυλ browser */
     cursor: pointer;
 }
 
-/* Προσαρμογή του "πιάστρα" (thumb) της μπάρας */
+/* Στυλ (thumb) σε WebKit (Chrome, Safari, Edge) */
 .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
     appearance: none;
-    width: 20px;
-    height: 20px;
+    width: 20px; 
+    height: 20px; 
     border-radius: 50%;
-    background: #a2ff00; /* Φωτεινό πράσινο */
+    background: #a2ff00; /* Χρώμα του thumb */
     cursor: pointer;
     border: 2px solid #fff;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
 }
+
+/* Στυλ για τον αντίχειρα (thumb) σε Firefox */
+.slider::-moz-range-thumb {
+    width: 15px;
+    height: 15px;
+    border: none; 
+    border-radius: 50%;
+    background: #000000;
+    cursor: pointer;
+}
+
 
 .slider-labels {
     display: flex;
@@ -88,8 +112,9 @@
 
 /* --- 3. Κουμπί Έναρξης --- */
 .start-button {
-    padding: 15px 35px;
-    font-size: 18px;
+    width: 70%;
+    padding: 10px 30px;
+    font-size: 15px;
     background-color: #005000; /* Βαθύ πράσινο */
     color: #a2ff00;
     border: 2px solid #a2ff00;
