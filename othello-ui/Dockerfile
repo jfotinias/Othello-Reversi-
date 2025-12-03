@@ -15,7 +15,6 @@ RUN npm run build --configuration=production
 FROM nginx:alpine
 
 # Αντιγράφουμε τα έτοιμα αρχεία build στην τοποθεσία του Nginx
-# Υποθέτουμε ότι ο output folder του Angular build είναι /dist/othello-ui/
-COPY --from=build /app/dist/othello-ui /usr/share/nginx/html
+COPY --from=build /app/dist/othello-ui/browser /usr/share/nginx/html
 
 EXPOSE 80

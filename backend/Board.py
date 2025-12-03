@@ -17,6 +17,8 @@ class Board:
         self.Board[3][4] = self.B
         self.Board[4][3] = self.B
 
+        self.move_history = []
+
         #self.Board[0][0] = self.W
         #self.Board[1][1] = self.W
         #self.Board[1][0] = self.B
@@ -28,6 +30,7 @@ class Board:
         new_board.last_move = copy.copy(self.last_move)
         new_board.last_player = self.last_player
         new_board.Board = [row[:] for row in self.Board]
+        new_board.move_history = self.move_history
         return new_board
 
 
@@ -169,6 +172,7 @@ class Board:
                         self.Board[x][y] = current_player
                     break
 
+        self.move_history.append((row, col))
         self.last_player = letter
 
     
@@ -201,7 +205,10 @@ class Board:
         if len(self.available_moves()) == 0 and len(self.copy_change_last_player().available_moves()) == 0:
             return True
         return False
-    
+
+
+    def get_move_history(self):
+        return self.move_history   
 
     def get_scores(self):
         whites = sum(row.count(self.W) for row in self.Board)
