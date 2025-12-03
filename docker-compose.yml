@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  # 1. Backend Service (FastAPI)
+  backend:
+    build:
+      context: ./backend # ❗ ΔΙΑΔΡΟΜΗ ΠΡΟΣ ΤΟΝ BACKEND ΦΑΚΕΛΟ
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000" # Μαππάρουμε τη θύρα 8000
+    
+  # 2. Frontend Service (Angular/Nginx)
+  frontend:
+    build:
+      context: ./othello-ui # ❗ ΔΙΑΔΡΟΜΗ ΠΡΟΣ ΤΟΝ FRONTEND ΦΑΚΕΛΟ
+      dockerfile: Dockerfile
+    ports:
+      - "4200:80" # Μαππάρουμε τη θύρα 80 (Nginx) στην εξωτερική 4200 (Browser)
+    depends_on:
+      - backend # Το frontend περιμένει το backend να ξεκινήσει
