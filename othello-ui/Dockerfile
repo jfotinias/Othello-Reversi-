@@ -15,6 +15,6 @@ RUN npm run build --configuration=production
 FROM nginx:alpine
 
 # ΔΙΟΡΘΩΣΗ 1: Απλά ο φάκελος dist
-COPY --from=build /app/dist /usr/share/nginx/html
+COPY --from=build /app/dist/othello-ui /usr/share/nginx/html
 
 EXPOSE 80
