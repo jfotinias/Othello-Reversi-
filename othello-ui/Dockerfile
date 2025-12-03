@@ -14,7 +14,7 @@ RUN npm run build --configuration=production
 # Stage 2: Σερβίρισμα των στατικών αρχείων με Nginx
 FROM nginx:alpine
 
-# Αντιγράφουμε τα έτοιμα αρχεία build στην τοποθεσία του Nginx
-COPY --from=build /app/dist/othello-ui/browser /usr/share/nginx/html
+# ΔΙΟΡΘΩΣΗ 1: Απλά ο φάκελος dist
+COPY --from=build /app/dist /usr/share/nginx/html
 
 EXPOSE 80
