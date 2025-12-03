@@ -1,8 +1,8 @@
-import { Component, OnInit, ChangeDetectorRef, EventEmitter, Output } from '@angular/core';
+import { Component, OnInit, Input, ChangeDetectorRef, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { GameService } from '../../services/game.service';
-import { delay } from 'rxjs/operators';
-import { lastValueFrom } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
+import { timer, lastValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-board',
@@ -13,6 +13,7 @@ import { lastValueFrom } from 'rxjs';
 })
 export class Board implements OnInit {
 
+  @Input() isGameOver: boolean = false;
   @Output() messageEvent = new EventEmitter<string>();
 
   board: number[][] = [];
@@ -69,15 +70,18 @@ loadBoard(): Promise<void> { // Τώρα επιστρέφει Promise
     return this.available_moves.some(move => move[0] === row && move[1] === col);
   }
 
-async handleAiChain(): Promise<void> { // ❗ Η συνάρτηση γίνεται async
+async handleAiChain(): Promise<void> { // Η συνάρτηση γίνεται async
     
     this.messageEvent.emit("Ο AI σκέφτεται..."); 
 
-    // 1. ⏰ Εφαρμόζουμε την καθυστέρηση (χρησιμοποιώντας setTimeout για delay)
-    await new Promise(resolve => setTimeout(resolve, 1000)); 
+    // 1. Εφαρμόζουμε την καθυστέρηση
+    const delayObservable = timer(1000); 
 
     try {
-        const aiResponse = await lastValueFrom(this.gameService.aiTurn());
+        const aiResponse = await lastValueFrom(delayObservable.pipe(
+            // Μόλις τελειώσει η καθυστέρηση, εκτελούμε την κλήση API
+            switchMap(() => this.gameService.aiTurn()) 
+        ));
 
         // 2. Ενημέρωση UI με την κίνηση του AI
         this.messageEvent.emit(aiResponse.message);
@@ -99,7 +103,6 @@ async handleGameEnd(): Promise<void> {
         const finalState = await lastValueFrom(this.gameService.getState());
 
         if (finalState.scores) {
-            // ❗ Εκπέμπουμε τα τελικά δεδομένα στο AppComponent
             this.gameEndEvent.emit({
                 message: finalState.message,
                 scores: finalState.scores 
@@ -111,6 +114,12 @@ async handleGameEnd(): Promise<void> {
 }
 
 async onCellClick(i: number, j: number) {
+    
+    if (this.isGameOver) {
+      // Μπορείς να εκπέμψεις ένα μήνυμα αν θέλεις
+      this.messageEvent.emit("Το παιχνίδι έχει τελειώσει. Πατήστε Reset.");
+      return; 
+    }
     try {
         const humanResponse = await lastValueFrom(this.gameService.makeMove(i, j));
 
@@ -120,14 +129,12 @@ async onCellClick(i: number, j: number) {
 
         // 2. Εάν το παιχνίδι τελείωσε ΑΜΕΣΩΣ με την κίνηση του ανθρώπου
         if (humanResponse.message.includes("Τέλος παιχνιδιού")) {
-             // ❗ ΚΑΛΟΥΜΕ το handleGameEnd που θα φέρει τα σκορ.
              this.handleGameEnd(); 
              return; 
         }
         
         // 3. Αν η σειρά περνάει στον AI, ξεκινάμε την αλυσίδα
-        if (humanResponse.next_player_is_ai) {    
-             // ❗ Περιμένουμε την αλυσίδα του AI να ολοκληρωθεί
+        if (humanResponse.next_player_is_ai) {
              await this.handleAiChain();
         }
 
@@ -138,7 +145,7 @@ async onCellClick(i: number, j: number) {
         // 💡 Εάν η handleAiChain ολοκληρώθηκε, ζητάμε την τελική κατάσταση.
         const finalState = await lastValueFrom(this.gameService.getState());
         
-        if (finalState.message && finalState.message.includes("Το παιχνίδι τελείωσε.")) {
+        if (finalState.message && finalState.message.includes("Τέλος παιχνιδιού")) {
             this.handleGameEnd();
         }
 

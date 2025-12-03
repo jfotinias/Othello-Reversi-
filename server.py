@@ -67,9 +67,9 @@ def get_state():
         # Υπολογισμός νικητή
         winner = "W" if scores["W"] > scores["B"] else ("B" if scores["B"] > scores["W"] else "Ισοπαλία")
         
-        # ❗ ΠΡΟΣΘΗΚΗ: Τα σκορ και το τελικό μήνυμα
+        # ΠΡΟΣΘΗΚΗ: Τα σκορ και το τελικό μήνυμα
         state["scores"] = scores 
-        state["message"] = f"🏁 Τέλος παιχνιδιού! Νικητής: {winner} (B: {scores['B']} vs W: {scores['W']})"
+        state["message"] = f"Τέλος παιχνιδιού!"
         
     return state
 
@@ -84,14 +84,14 @@ class MoveRequest(BaseModel):
 def make_move(data: MoveRequest):
     global game, human
 
-    # --- 1. ΕΛΕΓΧΟΣ ΣΕΙΡΑΣ (ΑΠΑΡΑΙΤΗΤΟ) ---
+    # --- 1. ΕΛΕΓΧΟΣ ΑΝ ΤΟ ΠΑΙΧΝΙΔΙ ΕΧΕΙ ΤΕΛΕΙΩΣΕΙ ---
+    if game.is_terminal():
+        raise HTTPException(status_code=400, detail="Το παιχνίδι έχει ήδη τελειώσει.")
+    
+    # --- 2. ΕΛΕΓΧΟΣ ΣΕΙΡΑΣ (ΑΠΑΡΑΙΤΗΤΟ) ---
     player_to_move = game.B if game.last_player == game.W else game.W
     if player_to_move != human.player_letter:
         raise HTTPException(status_code=403, detail="Δεν είναι η σειρά σας να παίξετε. Περιμένετε τον AI.")
-
-    # --- 2. ΕΛΕΓΧΟΣ ΑΝ ΤΟ ΠΑΙΧΝΙΔΙ ΕΧΕΙ ΤΕΛΕΙΩΣΕΙ ---
-    if game.is_terminal():
-        raise HTTPException(status_code=400, detail="Το παιχνίδι έχει ήδη τελειώσει.")
     
     human_move = (data.row, data.col)
     message = ""
@@ -109,9 +109,8 @@ def make_move(data: MoveRequest):
 
     if game.is_terminal():
         scores = game.get_scores()
-        
-        winner = "W" if scores["W"] > scores["B"] else ("B" if scores["B"] > scores["W"] else "Ισοπαλία")
-        message = f"Τέλος παιχνιδιού! Νικητής: {winner} (B: {scores['B']} vs W: {scores['W']})"
+
+        message = f"Τέλος παιχνιδιού!"
         return {
             "message": message,
             "board": game.Board,
@@ -172,8 +171,7 @@ def ai_turn():
     # 3. Έλεγχος Τέλος Παιχνιδιού
     if game.is_terminal():
         scores = game.get_scores()
-        winner = "W" if scores["W"] > scores["B"] else ("B" if scores["B"] > scores["W"] else "Ισοπαλία")
-        message = f"Τέλος παιχνιδιού! Νικητής: {winner} (B: {scores['B']} vs W: {scores['W']})"
+        message = f"Τέλος παιχνιδιού!"
         return {
             "message": message, 
             "ai_move": ai_move,

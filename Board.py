@@ -17,6 +17,11 @@ class Board:
         self.Board[3][4] = self.B
         self.Board[4][3] = self.B
 
+        #self.Board[0][0] = self.W
+        #self.Board[1][1] = self.W
+        #self.Board[1][0] = self.B
+        #self.Board[2][1] = self.B
+
 
     def __copy__(self):
         new_board = Board()
@@ -202,115 +207,3 @@ class Board:
         whites = sum(row.count(self.W) for row in self.Board)
         blacks = sum(row.count(self.B) for row in self.Board)
         return {"W": whites, "B": blacks}
-
-        
-    def evaluate_piece_diff(self, player):
-        opponent = self.W if player == self.B else self.B
-
-        player_count = 0
-        opponent_count = 0
-
-        for i in range(8):
-            for j in range(8):
-                piece = self.Board[i][j]
-                if piece == player:
-                    player_count += 1
-                elif piece == opponent:
-                    opponent_count += 1
-
-        return player_count - opponent_count
-        
-    def evaluate_mobility(self, player):
-        opponent = self.W if player == self.B else self.B
-        
-        player_moves = len(self.available_moves_for(player))
-        opponent_moves = len(self.available_moves_for(opponent))
-
-        return player_moves - opponent_moves
-    
-    
-    def evaluate_weighted(self, player):
-        # Ο αλγόριθμος evaluate_weighted αξιολογεί το ταμπλό όχι με βάση πόσα κομμάτια έχει ο καθένας,
-        # αλλά με βάση που βρίσκονται αυτά τα κομμάτια,
-        # δίνοντας μεγαλύτερη βαθμολογία σε στρατηγικά σημαντικές θέσεις
-
-        weights = [
-            [3, 2, 2, 2, 2, 2, 2, 3],
-            [2, 1, 1, 1, 1, 1, 1, 2],
-            [2, 1, 1, 1, 1, 1, 1, 2],
-            [2, 1, 1, 1, 1, 1, 1, 2],
-            [2, 1, 1, 1, 1, 1, 1, 2],
-            [2, 1, 1, 1, 1, 1, 1, 2],
-            [2, 1, 1, 1, 1, 1, 1, 2],
-            [3, 2, 2, 2, 2, 2, 2, 3],
-        ]
-
-        score = 0
-        for i in range(8):
-            for j in range(8):
-                piece = self.Board[i][j]
-                if piece == self.EMPTY:
-                    continue
-                if piece == player:
-                    # Παίκτης
-                    score += weights[i][j]
-                else:
-                    # Αντίπαλος
-                    score -= weights[i][j]
-        # Αν το score > 0 τότε ο παίκτης θεωρείται ότι έχει πλεονέκτημα στη συγκεκριμένη θέση του ταμπλό
-        # Αν το score < 0 τότε ο αντίπαλος θεωρείται ότι έχει πλεονέκτημα στη συγκεκριμένη θέση του ταμπλό
-        # Αν το score = 0 τότε το παιχνίδι θεωρείται ισορροπημένο στη συγκεκριμένη θέση του ταμπλό
-        return score
-
-    def evaluate_frontier(self, player):
-        # Ο αλγόριθμος evaluate_frontier:
-        # Σκανάρει το ταμπλό.
-        # Για κάθε πιόνι, ελέγχει αν δίπλα του υπάρχει κενό τετράγωνο
-        # Αν ναι, τότε το πιόνι είναι frontier disk (ευάλωτο)
-        # Μετράει πόσα τέτοια κομμάτια έχει ο παίκτης και πόσα έχει ο αντίπαλος
-        # Επιστρέφει το αποτέλεσμα: score = opponent_frontier - own_frontier
-
-
-        # Βρες τον αντίπαλο
-        opponent = self.W if player == self.B else self.B
-
-        directions = [
-            (-1, -1), (-1, 0), (-1, 1), 
-            (0, -1),           (0, 1) ,
-            (1, -1),  (1, 0),  (1, 1) ,
-        ]
-
-        own_frontier = 0 # πόσα κομμάτια του παίκτη μας είναι ευάλωτα (δίπλα σε άδειο τετράγωνο)
-        opponent_frontier  = 0 # πόσα ευάλωτα κομμάτια έχει ο αντίπαλος
-
-        # Σκανάρουμε όλο το 8x8 ταμπλό
-        for i in range(8):
-            for j in range(8):
-                piece = self.Board[i][j]
-                if piece == self.EMPTY:
-                    continue
-
-                # έλεγχος αν είναι frontier disk = 
-                # κομμάτι που συνορεύει με κενό τετράγωνο και 
-                # επομένως κινδυνεύει να ανατραπεί σύντομα
-                is_frontier = False
-                for di, dj in directions:
-                    ni, nj = i + di, j + dj
-                    if 0 <= ni < 8 and 0 <= nj < 8:
-                        if self.Board[ni][nj] == self.EMPTY:
-                            is_frontier = True
-                            break
-
-                if not is_frontier:
-                    continue
-
-                if piece == player:
-                    own_frontier += 1
-                elif piece == opponent:
-                    opponent_frontier  += 1
-
-        # Όσο λιγότερα frontier για τον παίκτη, τόσο καλύτερα
-        # Δηλ. βέλτιστο αποτέλεσμα είναι το σκορ να είναι θετικό, καθώς αυτό σημαίνει ότι
-        # ο αντίπαλος έχει περισσότερα ευάλωτα κομμάτια από τον παίκτη
-        score = opponent_frontier - own_frontier
-        return score

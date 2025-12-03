@@ -13,15 +13,20 @@
   <div class="game-content-wrapper">       
     <div class="score-placeholder">
       <div *ngIf="finalScores" class="final-score-box">
-        <h3>ΤΕΛΙΚΑ ΣΚΟΡ</h3>
+        <h3>ΤΕΛΙΚΟ ΣΚΟΡ</h3>
+        <p>⚫ Μαύρο : {{ finalScores.B }}</p>        
+        <p>⚪ Λευκό : {{ finalScores.W }}</p>
         <button (click)="resetGame()" class="reset-button">
-          Νέο Παιχνίδι / Reset
+          Νέο Παιχνίδι
         </button>
       </div>
     </div>
         
-    <app-board *ngIf="gameStarted" (messageEvent)="handleBoardMessage($event)" (gameEndEvent)="handleGameEnd($event)">
-    </app-board>      
+    <app-board *ngIf="gameStarted" (messageEvent)="handleBoardMessage($event)"
+    (gameEndEvent)="handleGameEnd($event)"
+    [isGameOver]="!!finalScores">
+    </app-board> 
+    <div class="score-placeholder"></div>     
   </div>
 
   <app-setup *ngIf="!gameStarted" (setupCompleted)="handleSetup($event)">

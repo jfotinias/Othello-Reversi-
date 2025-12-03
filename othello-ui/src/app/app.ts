@@ -21,31 +21,41 @@ export class App implements OnInit { // Αυτό είναι τώρα σωστό
 
   constructor(private gameService: GameService) {}
 
-  requestAiTurn(): void {
+requestAiTurn(): void {
+    // Εμφανίζουμε μήνυμα σκέψης πριν την καθυστέρηση
     this.message = "Ο AI σκέφτεται...";
     
     this.gameService.aiTurn().pipe(delay(1000)).subscribe({
         next: (aiResponse: any) => {
             
-            // 1. ΕΚΠΕΜΨΗ ΤΟΥ ΜΗΝΥΜΑΤΟΣ ΕΠΙΤΥΧΙΑΣ ΤΟΥ AI
+            // 1. Ενημέρωση πίνακα με την τελευταία κίνηση (πρέπει να γίνει πριν τον έλεγχο τερματισμού)
             this.handleBoardMessage(aiResponse.message); 
             
-            // 2. ❗ ΑΝΑΝΕΩΣΗ ΠΙΝΑΚΑ (Απαραίτητο βήμα)
+            // 2. Φορτώνουμε τον πίνακα (για να φαίνεται η κίνηση του AI)
             if (this.boardComponent) {
                 this.boardComponent.loadBoard(); 
             }
-            
-            // 3. Αναδρομή
+
+            // 3. ΕΛΕΓΧΟΣ ΤΕΡΜΑΤΙΣΜΟΥ
+            if (aiResponse.message.includes("Το παιχνίδι τελείωσε.")) {
+                this.handleGameEnd({
+                    message: aiResponse.message, 
+                    scores: aiResponse.scores || null
+                });
+                return; // Σταματάμε την αλυσίδα
+            }
+
+            // 4. Αναδρομή (αν χρειάζεται)
             if (aiResponse.next_player_is_ai) {
                  this.requestAiTurn(); 
             }
         },
         error: (err) => {
-             // 4. ΧΕΙΡΙΣΜΟΣ ΠΡΑΓΜΑΤΙΚΩΝ ΣΦΑΛΜΑΤΩΝ API
+             // 5. Χειρισμός Σφάλματος
              this.handleBoardMessage("⚠️ Σφάλμα στην κίνηση AI: " + (err.error?.detail || err.message));
         }
     });
-  }
+}
 // Νέα Μέθοδος που καλείται από το SetupComponent
   handleSetup(data: { color: 'W' | 'B', depth: number }): void {
         
@@ -85,18 +95,18 @@ export class App implements OnInit { // Αυτό είναι τώρα σωστό
     // (Βεβαιωθείτε ότι το handleBoardMessage(msg) δεν μηδενίζει το finalScores)
   }
 
-  resetGame(): void {
-    // 1. Καλούμε το reset endpoint
+  
+  resetGame(): void {  
+    this.gameStarted = false;    // Κρύβουμε τον πίνακα app-board
+    this.finalScores = null;     // Κρύβουμε το Scoreboard div
+    this.message = 'Διάλεξε ρυθμίσεις και πάτα Έναρξη.';
+
+    // 2. ΚΑΛΟΥΜΕ το reset endpoint
     this.gameService.reset().subscribe({
         next: () => {
-            // 2. Επαναφέρουμε την κατάσταση του UI/παιχνιδιού
-            this.gameStarted = false;
-            this.finalScores = null;
-            this.message = 'Διάλεξε ρυθμίσεις και πάτα Έναρξη.';
-            
-            // 3. (Προαιρετικό) Καλεί το loadBoard του BoardComponent για να καθαρίσει τον πίνακα
+            // 3. Ανανέωση του BoardComponent (τώρα που είναι κρυμμένο)
             if (this.boardComponent) {
-                 this.boardComponent.loadBoard(); 
+                this.boardComponent.loadBoard(); 
             }
         },
         error: (err) => {
