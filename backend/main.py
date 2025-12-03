@@ -74,4 +74,6 @@ def main():
     else:
         print("🤝 Ισοπαλία!")
 
+    print(game.get_move_history())
+
 main()
