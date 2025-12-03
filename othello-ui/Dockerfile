@@ -22,6 +22,6 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # 2. ΑΝΤΙΓΡΑΦΗ ΤΗΣ ΕΦΑΡΜΟΓΗΣ: Χρησιμοποιούμε τη ρίζα του build output (dist)
 # Αυτό είναι το /app/dist, που σημαίνει ο φάκελος dist μέσα στο othello-ui
-COPY --from=build /app/dist /usr/share/nginx/html
+COPY --from=build /app/dist /usr/share/nginx/othello-ui/browser/html/
 
 EXPOSE 80
