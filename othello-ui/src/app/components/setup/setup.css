@@ -1,7 +1,6 @@
 /* Βασικά στυλ για να ταιριάζουν με το background του παιχνιδιού */
 .setup-container {
-    width: 90%;
-    margin: 20px auto;
+    width: 100%;
     padding: 7%;
     background-color: #084310; /* Σκούρο/Βαθύ Πράσινο */
     border: 3px solid #a2ff00;

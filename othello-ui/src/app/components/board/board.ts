@@ -116,7 +116,6 @@ async handleGameEnd(): Promise<void> {
 async onCellClick(i: number, j: number) {
     
     if (this.isGameOver) {
-      // Μπορείς να εκπέμψεις ένα μήνυμα αν θέλεις
       this.messageEvent.emit("Το παιχνίδι έχει τελειώσει. Πατήστε Reset.");
       return; 
     }

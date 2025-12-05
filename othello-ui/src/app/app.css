@@ -84,7 +84,9 @@ main {
 /* ------------------ App-Setup ------------------ */
 
 app-setup {
-  width: 33%;
+  width: 30%;
+  padding-left: 20px;
+  padding-right: 20px;
 }
 
 /* ------------------ App-Board ------------------ */
