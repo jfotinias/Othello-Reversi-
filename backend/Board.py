@@ -19,6 +19,7 @@ class Board:
 
         self.move_history = []
 
+        # πίνακας για δοκιμές
         #self.Board[0][0] = self.W
         #self.Board[1][1] = self.W
         #self.Board[1][0] = self.B

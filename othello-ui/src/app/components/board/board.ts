@@ -86,7 +86,7 @@ async handleAiChain(): Promise<void> { // Η συνάρτηση γίνεται a
         await this.loadBoard(); // ❗ ΠΕΡΙΜΕΝΟΥΜΕ: Περιμένουμε την ανανέωση
 
         // 3. Αναδρομή (εάν ο AI πρέπει να παίξει ξανά)
-        if (aiResponse.next_player_is_ai && aiResponse.message !== "Το παιχνίδι τελείωσε.") {
+        if (aiResponse.next_player_is_ai && !aiResponse.scores) {
             await this.handleAiChain(); // ❗ Αναδρομική κλήση με await
         }
     } catch (aiErr: any) {
@@ -125,7 +125,7 @@ async onCellClick(i: number, j: number) {
         await this.loadBoard(); 
 
         // 2. Εάν το παιχνίδι τελείωσε ΑΜΕΣΩΣ με την κίνηση του ανθρώπου
-        if (humanResponse.message.includes("Τέλος παιχνιδιού")) {
+        if (humanResponse.scores) {
              this.handleGameEnd(); 
              return; 
         }
@@ -134,15 +134,11 @@ async onCellClick(i: number, j: number) {
         if (humanResponse.next_player_is_ai) {
              await this.handleAiChain();
         }
-
-        // 4. ΕΛΕΓΧΟΣ: Μήπως το handleAiChain ΤΕΛΕΙΩΣΕ το παιχνίδι;
-        // Το handleAiChain πρέπει να εκπέμπει event gameEndEvent αν τελειώσει το παιχνίδι.
-        // Εάν δεν υπάρχει event, πρέπει να γίνει έλεγχος.
         
-        // 💡 Εάν η handleAiChain ολοκληρώθηκε, ζητάμε την τελική κατάσταση.
+        // Εάν η handleAiChain ολοκληρώθηκε, ζητάμε την τελική κατάσταση.
         const finalState = await lastValueFrom(this.gameService.getState());
         
-        if (finalState.message && finalState.message.includes("Τέλος παιχνιδιού")) {
+        if (finalState.message) {
             this.handleGameEnd();
         }
 

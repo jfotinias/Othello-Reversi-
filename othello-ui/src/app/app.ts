@@ -5,6 +5,7 @@ import { FinalScoreComponent } from './components/finalScore/finalScore';
 import { DinoComponent } from './components/dino/dino';
 import { GameService } from './services/game.service';
 import { CommonModule } from '@angular/common';
+import { ChangeDetectorRef } from '@angular/core';
 import { delay } from 'rxjs/operators';
 
 // 1. ΟΡΙΣΜΟΣ ΤΩΝ ΦΑΣΕΩΝ (GamePhase)
@@ -31,7 +32,7 @@ export class App implements OnInit { // Αυτό είναι τώρα σωστό
   message: string = 'Γεια σου θνητέ! Ας παίξουμε μία παρτίδα. Σε αφήνω να διαλέξεις τις ρυθμίσεις!';
   finalScore: {W: number, B: number} | null = null;
 
-  constructor(private gameService: GameService) {}
+  constructor(private gameService: GameService, private cdRef: ChangeDetectorRef) {}
 
   // Η ΥΠΟΧΡΕΩΤΙΚΗ ΜΕΘΟΔΟΣ για το OnInit Interface
   ngOnInit(): void {
@@ -44,8 +45,6 @@ export class App implements OnInit { // Αυτό είναι τώρα σωστό
     // Κλήση στο FastAPI endpoint /setup_game/
     this.gameService.setupGame(data.color, data.depth).subscribe({
       next: (response: any) => {
-        const selectedColor = data.color === 'W' ? 'Λευκό' : 'Μαύρο';
-        const aiColor = data.color === 'W' ? 'Μαύρο' : 'Λευκό';
         
         if (data.color === 'W') {
           this.message = `Επέλεξες το Λευκό. Ξεκινάω!`;
@@ -55,6 +54,14 @@ export class App implements OnInit { // Αυτό είναι τώρα σωστό
         }
 
         this.gamePhase = GamePhase.Play;
+
+        this.cdRef.detectChanges();
+
+        if (this.boardComponent) {
+          this.boardComponent.loadBoard(); 
+        } else {
+          console.warn("BoardComponent still undefined after detectChanges. Using fallback.");
+        }
 
         if (data.color === 'W') { 
           setTimeout(() => {this.requestAiTurn();}, 2000);          
@@ -91,7 +98,7 @@ requestAiTurn(): void {
             }
 
             // 3. ΕΛΕΓΧΟΣ ΤΕΡΜΑΤΙΣΜΟΥ
-            if (aiResponse.message.includes("Το παιχνίδι τελείωσε.")) {
+            if (aiResponse.scores) {
                 this.handleGameEnd({
                     message: aiResponse.message, 
                     scores: aiResponse.scores || null

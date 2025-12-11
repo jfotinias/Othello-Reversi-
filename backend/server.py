@@ -9,7 +9,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:4200"],
+    allow_origins=["http://localhost:4200", "http://127.0.0.1:4200"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -65,12 +65,9 @@ def get_state():
     if game.is_terminal():
         scores = game.get_scores() # <-- ΚΑΛΟΥΜΕ ΤΟΝ ΥΠΟΛΟΓΙΣΜΟ ΣΚΟΡ
         
-        # Υπολογισμός νικητή
-        winner = "W" if scores["W"] > scores["B"] else ("B" if scores["B"] > scores["W"] else "Ισοπαλία")
-        
         # ΠΡΟΣΘΗΚΗ: Τα σκορ και το τελικό μήνυμα
-        state["scores"] = scores 
-        state["message"] = f"Τέλος παιχνιδιού!"
+        state["scores"] = scores
+        state["message"] = "Καλό παιχνίδι!"
         
     return state
 
@@ -104,14 +101,14 @@ def make_move(data: MoveRequest):
     human_has_moves = game.available_moves_for(human.player_letter)
     if human_has_moves:
         game.make_move(data.row, data.col, human.player_letter)
+        message = messages.get_comment_move_message()
     else:
         human_move = None # Ο άνθρωπος κάνει πάσο
         game.change_last_player()  # Αλλάζουμε σειρά στον AI
 
     if game.is_terminal():
-        scores = game.get_scores()
-
-        message = f"Τέλος παιχνιδιού!"
+        scores = game.get_scores()    
+        message = "Καλό παιχνίδι"
         return {
             "message": message,
             "board": game.Board,
@@ -121,7 +118,7 @@ def make_move(data: MoveRequest):
         }
     else:
         return {
-            "message": "...",
+            "message": message,
             "board": game.Board,
             "human_move": human_move,
             "next_player_is_ai": True # <-- Η σειρά είναι του AI    
@@ -172,7 +169,7 @@ def ai_turn():
     # 3. Έλεγχος Τέλος Παιχνιδιού
     if game.is_terminal():
         scores = game.get_scores()
-        message = f"Τέλος παιχνιδιού!"
+        message = "Καλό παιχνίδι"
         return {
             "message": message, 
             "ai_move": ai_move,
