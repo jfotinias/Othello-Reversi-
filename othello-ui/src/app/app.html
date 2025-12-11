@@ -5,31 +5,30 @@
       <h2>OTHELLO</h2>
     </div>
   </div>
-  <div class="message-box">
-    <strong>Κατάσταση:</strong> {{ message }}
-  </div>
-  <hr>
 
-  <div class="game-content-wrapper">       
-    <div class="score-placeholder">
-      <div *ngIf="finalScores" class="final-score-box">
-        <h3>ΤΕΛΙΚΟ ΣΚΟΡ</h3>
-        <p>⚫ Μαύρο : {{ finalScores.B }}</p>        
-        <p>⚪ Λευκό : {{ finalScores.W }}</p>
-        <button (click)="resetGame()" class="reset-button">
-          Νέο Παιχνίδι
-        </button>
-      </div>
+  <div class="game-content-wrapper">
+    
+    <div class="left-placeholder">
+      <app-final-score *ngIf="gamePhase === GamePhase.End"
+        [scores]="finalScore"
+        (resetGame)="resetGame()"> 
+      </app-final-score>
     </div>
-        
-    <app-board *ngIf="gameStarted" (messageEvent)="handleBoardMessage($event)"
-    (gameEndEvent)="handleGameEnd($event)"
-    [isGameOver]="!!finalScores">
-    </app-board> 
-    <div class="score-placeholder"></div>     
-  </div>
+    
+    <div class="game-placeholder">
+      <div class="vertical-spacer"></div>
+      <app-setup *ngIf="gamePhase === GamePhase.Start" (setupCompleted)="handleSetup($event)">
+      </app-setup>
 
-  <app-setup *ngIf="!gameStarted" (setupCompleted)="handleSetup($event)">
-  </app-setup>
-  
+      <app-board *ngIf="gamePhase === GamePhase.Play || gamePhase === GamePhase.End"
+        (messageEvent)="handleBoardMessage($event)"
+        (gameEndEvent)="handleGameEnd($event)">
+      </app-board>
+      <div class="vertical-spacer"></div>
+    </div>
+    
+    <div class="right-placeholder">
+      <app-dino [currentMessage]="message"></app-dino>
+    </div>
+  </div>
 </main>

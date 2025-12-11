@@ -71,8 +71,6 @@ loadBoard(): Promise<void> { // Τώρα επιστρέφει Promise
   }
 
 async handleAiChain(): Promise<void> { // Η συνάρτηση γίνεται async
-    
-    this.messageEvent.emit("Ο AI σκέφτεται..."); 
 
     // 1. Εφαρμόζουμε την καθυστέρηση
     const delayObservable = timer(1000); 
@@ -149,7 +147,7 @@ async onCellClick(i: number, j: number) {
         }
 
     } catch (err: any) { 
-        this.messageEvent.emit("⚠️ Άκυρη κίνηση: " + (err.error?.detail || err.message));
+        this.messageEvent.emit ((err.error?.detail || err.message));
     }
   }
 }

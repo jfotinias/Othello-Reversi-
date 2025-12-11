@@ -1,9 +1,19 @@
 /* ------------------ Layout ------------------ */
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
 main {
   width: 100%;
+  height: 100%;
   display: flex; 
   flex-direction: column;
   align-items: center;
+  padding: 0;
+  margin: 0;
 }
 
 /* ------------------ Animated Title Bar ------------------ */
@@ -31,6 +41,7 @@ main {
 
 .container {
   display: flex;
+  margin-bottom: 0;
   justify-content: center;
   align-items: center;
   background: var(--background-gradient);
@@ -81,222 +92,78 @@ main {
   }
 }
 
+
+/* ------------------ vertical-spacer ------------------ */
+
+.vertical-spacer {
+    height: 43.5px; /* Όσο κενό θέλεις, π.χ. 50px */
+    width: 100%;
+}
+
+
+/* ------------------ Wrapper ------------------ */
+
+.game-content-wrapper {
+    display: flex;
+    flex-grow: 1;
+    width: 100%;
+    margin-top: 0; 
+    margin-bottom: 0;
+    justify-content: center;
+    align-items: stretch; 
+    gap: 30px; /* Απόσταση μεταξύ του score box και του πίνακα */
+}
+
+.game-placeholder {
+    display: flex;
+    flex: 1 1 0; 
+    flex-grow: 1; 
+    flex-direction: column; 
+    justify-content: center; 
+    align-items: center;     
+}
+
+.left-placeholder {
+    min-width: 200px;
+    height: auto; 
+    display: flex;
+    flex-direction: column; 
+    justify-content: center; 
+    align-items: center;
+    flex: 1 1 0;
+}
+
+.right-placeholder {
+    min-width: 200px;
+    height: auto; 
+    display: flex;
+    flex-direction: column; 
+    justify-content: flex-end; 
+    align-items: flex-end;
+    flex: 1 1 0;
+}
+
+
 /* ------------------ App-Setup ------------------ */
 
 app-setup {
-  width: 30%;
-  padding-left: 20px;
-  padding-right: 20px;
+  width:  100%;
 }
 
 /* ------------------ App-Board ------------------ */
 
 app-board {
   width: 100%;
-  margin-bottom: 20px;
 }
 
-/* ------------------ Message-Box ------------------ */
+/* ------------------ App-Dino ------------------ */
 
-.message-box {
-  margin: 20px;
-  text-align: center;
-}
-
-/* ------------------ Wrapper ------------------ */
-
-.game-content-wrapper {
-    display: flex;
-    /* Ορίζουμε ένα μέγιστο πλάτος για όλο το περιεχόμενο του παιχνιδιού */
-    max-width: 900px; 
-    width: 100%;
-    justify-content: center;
-    align-items: flex-start; /* Ευθυγράμμιση στην κορυφή */
-    gap: 30px; /* Απόσταση μεταξύ του score box και του πίνακα */
-}
-
-.score-placeholder {
-    /* Πρέπει να είναι το ίδιο πλάτος με το .final-score-box */
-    width: 200px; 
-    min-width: 200px;
-    height: auto; 
-    display: flex;
-    flex-direction: column; /* Για να κεντράρει το score box αν είναι μικρότερο */
-    margin-right: 50px;
-}
-
-/* ------------------ 1. FINAL SCORE BOX (Container) ------------------ */
-
-.final-score-box {
-    /* Βασικό Layout */
-    width: 100%; 
-    min-width: 180px;
-    padding: 20px 15px; /* Ελαφρώς περισσότερο padding */
-    margin: 0;
-    
-    /* Γραφικά/Στυλ */
-    background-color: #12551e; /* Βαθύ Πράσινο */
-    border: 3px solid #a2ff00; /* Έντονο εξωτερικό περίγραμμα */
-    border-radius: 12px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6); /* Πιο έντονη 3D σκιά */
-    color: #e0ffe0; /* Ανοιχτό πράσινο/λευκό κείμενο */
-    
-    /* Flexbox για εσωτερική ευθυγράμμιση */
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* Κεντράρει τα παιδιά */
-}
-
-/* --- 2. ΤΙΤΛΟΣ (ΤΕΛΙΚΟ ΣΚΟΡ) --- */
-.final-score-box h3 {
-    color: #a2ff00; /* Φωτεινό πράσινο */
-    font-size: 1.4rem;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    margin-bottom: 15px;
-    border-bottom: 2px solid rgba(162, 255, 0, 0.5); /* Διαχωριστική γραμμή */
-    padding-bottom: 5px;
-}
-
-/* --- 3. ΣΚΟΡ ΠΑΙΚΤΩΝ (P Tags) --- */
-.final-score-box p {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin: 5px 0;
-    padding: 5px;
-    width: 100%;
-}
-
-/* Ειδική έμφαση στο χρώμα του σκορ */
-.final-score-box p:first-of-type { /* Μαύρα */
-    color: #cccccc; /* Ανοιχτό γκρι για τα Μαύρα */
-}
-.final-score-box p:last-of-type { /* Λευκά */
-    color: #ffffff; /* Καθαρό λευκό για τα Λευκά */
-}
-
-
-/* --- 4. ΚΟΥΜΠΙ RESET --- */
-.final-score-box .reset-button {
-    margin-top: 25px;
-    padding: 10px 20px;
-    font-size: 1rem;
-    font-weight: 700;
-    cursor: pointer;
-    
-    background-color: #005000; /* Πιο σκούρο πράσινο */
-    color: #a2ff00;
-    border: 1px solid #a2ff00;
-    border-radius: 6px;
-    transition: all 0.2s ease-in-out;
-}
-
-.final-score-box .reset-button:hover {
-    background-color: #a2ff00;
-    color: #12551e; /* Σκούρο πράσινο κείμενο στο hover */
-    transform: scale(1.03);
+app-dino {
+    margin: 0; 
+    padding: 0;
 }
 
 
 .angular-logo {
     max-width: 9.2rem;
   }
-
-/*
-.content h1 {
-    margin-top: 1.75rem;
-  }
-
-.content p {
-    margin-top: 1.5rem;
-  }
-
-.divider {
-    width: 1px;
-    background: var(--red-to-pink-to-purple-vertical-gradient);
-    margin-inline: 0.5rem;
-  }
-
-.pill-group {
-    display: flex;
-    flex-direction: column;
-    align-items: start;
-    flex-wrap: wrap;
-    gap: 1.25rem;
-  }
-
-.pill {
-    display: flex;
-    align-items: center;
-    --pill-accent: var(--bright-blue);
-    background: color-mix(in srgb, var(--pill-accent) 5%, transparent);
-    color: var(--pill-accent);
-    padding-inline: 0.75rem;
-    padding-block: 0.375rem;
-    border-radius: 2.75rem;
-    border: 0;
-    transition: background 0.3s ease;
-    font-family: var(--inter-font);
-    font-size: 0.875rem;
-    font-style: normal;
-    font-weight: 500;
-    line-height: 1.4rem;
-    letter-spacing: -0.00875rem;
-    text-decoration: none;
-    white-space: nowrap;
-  }
-
-.pill:hover {
-    background: color-mix(in srgb, var(--pill-accent) 15%, transparent);
-  }
-
-.pill-group .pill:nth-child(6n + 1) {
-    --pill-accent: var(--bright-blue);
-  }
-.pill-group .pill:nth-child(6n + 2) {
-    --pill-accent: var(--electric-violet);
-  }
-.pill-group .pill:nth-child(6n + 3) {
-    --pill-accent: var(--french-violet);
-  }
-
-.pill-group .pill:nth-child(6n + 4),
-  .pill-group .pill:nth-child(6n + 5),
-  .pill-group .pill:nth-child(6n + 6) {
-    --pill-accent: var(--hot-red);
-  }
-
-  .pill-group svg {
-    margin-inline-start: 0.25rem;
-  }
-
-  .social-links {
-    display: flex;
-    align-items: center;
-    gap: 0.73rem;
-    margin-top: 1.5rem;
-  }
-
-  .social-links path {
-    transition: fill 0.3s ease;
-    fill: var(--gray-400);
-  }
-
-  .social-links a:hover svg path {
-    fill: var(--gray-900);
-  }
-
-  @media screen and (max-width: 650px) {
-    .content {
-      flex-direction: column;
-      width: max-content;
-    }
-
-    .divider {
-      height: 1px;
-      width: 100%;
-      background: var(--red-to-pink-to-purple-horizontal-gradient);
-      margin-block: 1.5rem;
-    }
-  }
-*/

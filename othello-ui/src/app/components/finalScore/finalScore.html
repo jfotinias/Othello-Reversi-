@@ -1,0 +1,12 @@
+<div class="final-score-box">
+  <h3>ΤΕΛΙΚΟ ΣΚΟΡ</h3>
+  
+  <ng-container *ngIf="scores">
+    <p>⚫ Μαύρο : {{ scores.B }}</p>        
+    <p>⚪ Λευκό : {{ scores.W }}</p>
+  </ng-container>
+  
+  <button (click)="onResetClick()" class="reset-button">
+    Νέο Παιχνίδι
+  </button>
+</div>

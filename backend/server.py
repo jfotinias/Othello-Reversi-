@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from Board import Board
 from Player import HumanPlayer, AIPlayer
+import messages
 
 app = FastAPI()
 
@@ -91,14 +92,14 @@ def make_move(data: MoveRequest):
     # --- 2. ΕΛΕΓΧΟΣ ΣΕΙΡΑΣ (ΑΠΑΡΑΙΤΗΤΟ) ---
     player_to_move = game.B if game.last_player == game.W else game.W
     if player_to_move != human.player_letter:
-        raise HTTPException(status_code=403, detail="Δεν είναι η σειρά σας να παίξετε. Περιμένετε τον AI.")
+        raise HTTPException(status_code=403, detail="Περίμενε, σκέφτομαι...")
     
     human_move = (data.row, data.col)
     message = ""
 
     # 3. --- Έλεγχος Εγκυρότητας Κίνησης ---
     if not game.is_valid_move(data.row, data.col):
-        raise HTTPException(status_code=400, detail=" Δεν είναι έγκυρη θέση.")
+        raise HTTPException(status_code=400, detail=messages.get_invalid_move_message())
     
     human_has_moves = game.available_moves_for(human.player_letter)
     if human_has_moves:
@@ -120,7 +121,7 @@ def make_move(data: MoveRequest):
         }
     else:
         return {
-            "message": "Η κίνηση του ανθρώπου έγινε.",  
+            "message": "...",
             "board": game.Board,
             "human_move": human_move,
             "next_player_is_ai": True # <-- Η σειρά είναι του AI    
@@ -151,7 +152,7 @@ def ai_turn():
     # 2. Κίνηση AI (Minimax)    
     if not ai_has_moves:
         # Ο AI κάνει πάσο
-        message = "Ο AI έκανε πάσο."
+        message = messages.get_pass_message()
         game.change_last_player()  # Αλλάζουμε σειρά στον άνθρωπο
         
     else:
@@ -161,11 +162,11 @@ def ai_turn():
         if ai_move is not None:
             r, c = ai_move
             game.make_move(r, c, ai.player_letter)
-            message = "Ο AI έπαιξε."
+            message = messages.get_ai_play_message()
         else:
             # Σπάνια περίπτωση, αλλά αν συμβεί, θεωρούμε πάσο και αλλάζουμε σειρά.
             ai_move = None
-            message = "Ο AI έκανε πάσο (Minimax)."
+            message = messages.get_pass_message()
             game.change_last_player() # <-- ΠΡΟΣΘΗΚΗ
 
     # 3. Έλεγχος Τέλος Παιχνιδιού

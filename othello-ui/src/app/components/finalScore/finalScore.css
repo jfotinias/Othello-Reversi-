@@ -1,0 +1,71 @@
+/* ------------------ 1. FINAL SCORE BOX (Container) ------------------ */
+
+.final-score-box {
+    /* Βασικό Layout */
+    width: 200px; 
+    min-width: 180px;
+    padding: 20px 15px; 
+    margin: 0;
+    
+    /* Γραφικά/Στυλ */
+    background-color: #12551e; /* Βαθύ Πράσινο */
+    border: 3px solid #a2ff00; /* Έντονο εξωτερικό περίγραμμα */
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6); /* Πιο έντονη 3D σκιά */
+    color: #e0ffe0; /* Ανοιχτό πράσινο/λευκό κείμενο */
+    
+    /* Flexbox για εσωτερική ευθυγράμμιση */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Κεντράρει τα παιδιά */
+}
+
+/* --- 2. ΤΙΤΛΟΣ (ΤΕΛΙΚΟ ΣΚΟΡ) --- */
+.final-score-box h3 {
+    color: #a2ff00; /* Φωτεινό πράσινο */
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 15px;
+    border-bottom: 2px solid rgba(162, 255, 0, 0.5); /* Διαχωριστική γραμμή */
+    padding-bottom: 5px;
+}
+
+/* --- 3. ΣΚΟΡ ΠΑΙΚΤΩΝ (P Tags) --- */
+.final-score-box p {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 5px 0;
+    padding: 5px;
+    width: 100%;
+}
+
+/* Ειδική έμφαση στο χρώμα του σκορ */
+.final-score-box p:first-of-type { /* Μαύρα */
+    color: #cccccc; /* Ανοιχτό γκρι για τα Μαύρα */
+}
+.final-score-box p:last-of-type { /* Λευκά */
+    color: #ffffff; /* Καθαρό λευκό για τα Λευκά */
+}
+
+
+/* --- 4. ΚΟΥΜΠΙ RESET --- */
+.final-score-box .reset-button {
+    margin-top: 25px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    
+    background-color: #005000; /* Πιο σκούρο πράσινο */
+    color: #a2ff00;
+    border: 1px solid #a2ff00;
+    border-radius: 6px;
+    transition: all 0.2s ease-in-out;
+}
+
+.final-score-box .reset-button:hover {
+    background-color: #a2ff00;
+    color: #12551e; /* Σκούρο πράσινο κείμενο στο hover */
+    transform: scale(1.03);
+}

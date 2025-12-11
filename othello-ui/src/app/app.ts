@@ -1,14 +1,23 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Board } from './components/board/board';
 import { SetupComponent } from './components/setup/setup';
+import { FinalScoreComponent } from './components/finalScore/finalScore';
+import { DinoComponent } from './components/dino/dino';
 import { GameService } from './services/game.service';
 import { CommonModule } from '@angular/common';
 import { delay } from 'rxjs/operators';
 
+// 1. ΟΡΙΣΜΟΣ ΤΩΝ ΦΑΣΕΩΝ (GamePhase)
+export enum GamePhase {
+  Start = 'Start', // Εμφανίζεται το SetupComponent
+  Play = 'Play',   // Εμφανίζεται το BoardComponent
+  End = 'End'      // Εμφανίζεται το FinalScoreComponent
+}
+
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [Board, SetupComponent, CommonModule],
+  imports: [Board, SetupComponent, FinalScoreComponent, DinoComponent, CommonModule],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
@@ -16,21 +25,66 @@ export class App implements OnInit { // Αυτό είναι τώρα σωστό
   
   @ViewChild(Board) boardComponent!: Board;
 
-  gameStarted: boolean = false; 
-  message: string = 'Διάλεξε ρυθμίσεις και πάτα Έναρξη.';
+  public GamePhase = GamePhase;
+
+  gamePhase: GamePhase = GamePhase.Start;
+  message: string = 'Γεια σου θνητέ! Ας παίξουμε μία παρτίδα. Σε αφήνω να διαλέξεις τις ρυθμίσεις!';
+  finalScore: {W: number, B: number} | null = null;
 
   constructor(private gameService: GameService) {}
 
-requestAiTurn(): void {
-    // Εμφανίζουμε μήνυμα σκέψης πριν την καθυστέρηση
-    this.message = "Ο AI σκέφτεται...";
+  // Η ΥΠΟΧΡΕΩΤΙΚΗ ΜΕΘΟΔΟΣ για το OnInit Interface
+  ngOnInit(): void {
+  // Εδώ θα έμπαινε κώδικας που εκτελείται μία φορά μετά την αρχικοποίηση του component
+  }
+
+  // Νέα Μέθοδος που καλείται από το SetupComponent
+  handleSetup(data: { color: 'W' | 'B', depth: number }): void {
+        
+    // Κλήση στο FastAPI endpoint /setup_game/
+    this.gameService.setupGame(data.color, data.depth).subscribe({
+      next: (response: any) => {
+        const selectedColor = data.color === 'W' ? 'Λευκό' : 'Μαύρο';
+        const aiColor = data.color === 'W' ? 'Μαύρο' : 'Λευκό';
+        
+        if (data.color === 'W') {
+          this.message = `Επέλεξες το Λευκό. Ξεκινάω!`;
+          delay(1000);
+        } else {
+          this.message = `Επέλεξες το Μαύρο. Κάνε την πρώτη σου κίνηση.`;
+        }
+
+        this.gamePhase = GamePhase.Play;
+
+        if (data.color === 'W') { 
+          setTimeout(() => {this.requestAiTurn();}, 2000);          
+        }
+      },
+      error: (err) => {
+        this.message = 'Σφάλμα κατά την έναρξη: ' + (err.error?.detail || 'Δεν τρέχει το backend.');
+        this.gamePhase = GamePhase.Play;
+      }
+    });
+  }
+
+  handleGameEnd(event: { message: string, scores: any }): void {
+    this.message = event.message;
+    this.finalScore = event.scores;
+    this.gamePhase = GamePhase.End; // Αυτό θα κάνει το div ορατό!
     
+    // (Βεβαιωθείτε ότι το handleBoardMessage(msg) δεν μηδενίζει το finalScores)
+  }
+requestAiTurn(): void {
     this.gameService.aiTurn().pipe(delay(1000)).subscribe({
         next: (aiResponse: any) => {
             
             // 1. Ενημέρωση πίνακα με την τελευταία κίνηση (πρέπει να γίνει πριν τον έλεγχο τερματισμού)
             this.handleBoardMessage(aiResponse.message); 
-            
+            if (aiResponse) {
+                this.message = aiResponse.message
+            } else {
+                this.message = 'Έπαιξα!'
+            }
             // 2. Φορτώνουμε τον πίνακα (για να φαίνεται η κίνηση του AI)
             if (this.boardComponent) {
                 this.boardComponent.loadBoard(); 
@@ -56,50 +110,17 @@ requestAiTurn(): void {
         }
     });
 }
-// Νέα Μέθοδος που καλείται από το SetupComponent
-  handleSetup(data: { color: 'W' | 'B', depth: number }): void {
-        
-    // Κλήση στο FastAPI endpoint /setup_game/
-    this.gameService.setupGame(data.color, data.depth).subscribe({
-      next: (response: any) => {
-        this.message = response.message;
-        this.gameStarted = true; // 🔑 Εμφανίζεται ο πίνακας
-
-        if (data.color === 'W') { 
-          setTimeout(() => {this.requestAiTurn();}, 0);          
-        }
-      },
-      error: (err) => {
-        this.message = 'Σφάλμα κατά την έναρξη: ' + (err.error?.detail || 'Δεν τρέχει το backend.');
-        this.gameStarted = false;
-      }
-    });
-  }
-
-  // Η ΥΠΟΧΡΕΩΤΙΚΗ ΜΕΘΟΔΟΣ για το OnInit Interface
-  ngOnInit(): void {
-    // Εδώ θα έμπαινε κώδικας που εκτελείται μία φορά μετά την αρχικοποίηση του component
-  }
-
-  finalScores: {W: number, B: number} | null = null;
 
   handleBoardMessage(msg: string, scores: {W: number, B: number} | null = null): void {
     this.message = msg;
-    this.finalScores = scores;
-  }
-
-  handleGameEnd(event: { message: string, scores: any }): void {
-    this.message = event.message;
-    this.finalScores = event.scores; // Αυτό θα κάνει το div ορατό!
-    
-    // (Βεβαιωθείτε ότι το handleBoardMessage(msg) δεν μηδενίζει το finalScores)
+    this.finalScore = scores;
   }
 
   
   resetGame(): void {  
-    this.gameStarted = false;    // Κρύβουμε τον πίνακα app-board
-    this.finalScores = null;     // Κρύβουμε το Scoreboard div
-    this.message = 'Διάλεξε ρυθμίσεις και πάτα Έναρξη.';
+    this.gamePhase = GamePhase.Start;  
+    this.finalScore = null;     // Κρύβουμε το Scoreboard div
+    this.message = 'Ας παίξουμε ξανά';
 
     // 2. ΚΑΛΟΥΜΕ το reset endpoint
     this.gameService.reset().subscribe({
