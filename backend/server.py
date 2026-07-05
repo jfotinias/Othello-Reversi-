@@ -1,3 +1,4 @@
+import uuid
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -15,9 +16,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-game = Board()
-ai = None
-human = None
+active_games = {}
 
 # ------ Setup Request ------
 class SetupRequest(BaseModel):
@@ -28,9 +27,7 @@ class SetupRequest(BaseModel):
 # ------ Setup Game Endpoint ------
 @app.post("/api/setup_game/")
 def setup_game(data: SetupRequest):
-    global game, ai, human
-
-    # reset board
+    game_id = str(uuid.uuid4())
     game = Board()
 
     # Convert W or B ↓ to your internal 1 / -1
@@ -41,15 +38,27 @@ def setup_game(data: SetupRequest):
         human = HumanPlayer(Board.B)
         ai = AIPlayer(Board.W, data.depth)
 
+    game.human = human
+    game.ai = ai
+    active_games[game_id] = game
+
     return {
+        "game_id": game_id,
         "message": "Το παιχνίδι ξεκίνησε!",
         "human_color": data.human_color,
         "ai_color": "B" if data.human_color.upper() == "W" else "W",
-        "depth": data.depth}
+        "depth": data.depth
+    }
 
 # ------ State Endpoint ------
 @app.get("/api/state")
-def get_state():
+def get_state(game_id: str):
+    game = active_games.get(game_id)
+    if not game:
+        raise HTTPException(status_code=404, detail="Game not found.")
+
+    ai = getattr(game, 'ai', None)
+    
     # Βασικά δεδομένα κατάστασης
     state = {
         "board": game.Board,
@@ -58,7 +67,7 @@ def get_state():
             game.last_move.col
         ) if game.last_move else None,
         "last_player": game.last_player,
-        "available_moves": game.available_moves() if game.last_player == ai.player_letter else None
+        "available_moves": game.available_moves() if ai and game.last_player == ai.player_letter else None
     }
     
     # Εάν το παιχνίδι τελείωσε, υπολογίζουμε τα σκορ και προσθέτουμε το message
@@ -74,13 +83,20 @@ def get_state():
 
 # ------ Make Move Endpoint ------
 class MoveRequest(BaseModel):
+    game_id: str
     row: int
     col: int
 
 
 @app.post("/api/make_move/")
 def make_move(data: MoveRequest):
-    global game, human
+    game = active_games.get(data.game_id)
+    if not game:
+        raise HTTPException(status_code=404, detail="Game not found.")
+
+    human = getattr(game, 'human', None)
+    if not human:
+        raise HTTPException(status_code=400, detail="Human player config is missing.")
 
     # --- 1. ΕΛΕΓΧΟΣ ΑΝ ΤΟ ΠΑΙΧΝΙΔΙ ΕΧΕΙ ΤΕΛΕΙΩΣΕΙ ---
     if game.is_terminal():
@@ -94,7 +110,7 @@ def make_move(data: MoveRequest):
     human_move = (data.row, data.col)
     message = ""
 
-    # 3. --- Έλεγχος Εγκυρότητας Κίνησης ---
+    # 3. --- Έλεγχος Εγκυρος Κίνησης ---
     if not game.is_valid_move(data.row, data.col):
         raise HTTPException(status_code=400, detail=messages.get_invalid_move_message())
     
@@ -125,10 +141,20 @@ def make_move(data: MoveRequest):
         }
         
 # ------ AI Turn Endpoint ------
+class AiTurnRequest(BaseModel):
+    game_id: str
+
 
 @app.post("/api/ai_turn/")
-def ai_turn():
-    global game, ai
+def ai_turn(data: AiTurnRequest):
+    game = active_games.get(data.game_id)
+    if not game:
+        raise HTTPException(status_code=404, detail="Game not found.")
+
+    ai = getattr(game, 'ai', None)
+    human = getattr(game, 'human', None)
+    if not ai or not human:
+        raise HTTPException(status_code=400, detail="Player configs are missing.")
 
     # 1. ΕΛΕΓΧΟΣ ΣΕΙΡΑΣ: Ο AI πρέπει να έχει σειρά.
     player_to_move = game.B if game.last_player == game.W else game.W
@@ -196,8 +222,19 @@ def ai_turn():
         }
 
 # ------ Reset Endpoint ------
+class ResetRequest(BaseModel):
+    game_id: str
+
+
 @app.post("/api/reset")
-def reset():
-    global game, ai, human
-    game = Board()
-    return {"status": "reset"}
+def reset(data: ResetRequest):
+    game = active_games.get(data.game_id)
+    if not game:
+        raise HTTPException(status_code=404, detail="Game not found.")
+    
+    new_game = Board()
+    new_game.ai = getattr(game, 'ai', None)
+    new_game.human = getattr(game, 'human', None)
+    active_games[data.game_id] = new_game
+    return {"status": "reset", "game_id": data.game_id}
+
