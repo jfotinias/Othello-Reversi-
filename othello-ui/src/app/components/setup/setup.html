@@ -2,7 +2,6 @@
     <h2> Επιλογή Ρυθμίσεων</h2>
 
     <div class="color-selection">
-        <h3>1. Διάλεξε Χρώμα:</h3>
         <button 
             [class.selected]="selectedColor === 'B'" 
             (click)="selectedColor = 'B'">
@@ -16,7 +15,7 @@
     </div>
 
     <div class="depth-selection">
-        <h3>2. Διάλεξε Βάθος AI: ({{ selectedDepth }})</h3>
+        <h3>2. Διάλεξε Δυσκολία: ({{ selectedDepth }})</h3>
         <input 
             type="range" 
             min="1" 

@@ -1,8 +1,11 @@
 /* Βασικά στυλ για να ταιριάζουν με το background του παιχνιδιού */
 .setup {
-    width: 90%;
-    height: 468px;
-    padding: 7%;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 450px;
+    height: auto;
+    min-height: 400px;
+    padding: 24px;
     margin: 0 auto;
     background-color: #084310; /* Σκούρο/Βαθύ Πράσινο */
     border: 3px solid #a2ff00;
@@ -28,12 +31,16 @@ h2 {
     border: 3px solid #a2ff00;
     border-radius: 8px;
     background-color: #189e1a; /* Ελαφρώς πιο ανοιχτό background */
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
 }
 
 .color-selection button {
-    width: 275px;
+    flex: 1 1 120px;
+    max-width: 250px;
     padding: 10px;
-    margin: 10px;
     border: 2px solid #a2ff00;
     border-radius: 20px;
     cursor: pointer;
