@@ -26,7 +26,7 @@ class SetupRequest(BaseModel):
 
 
 # ------ Setup Game Endpoint ------
-@app.post("/setup_game/")
+@app.post("/api/setup_game/")
 def setup_game(data: SetupRequest):
     global game, ai, human
 
@@ -48,7 +48,7 @@ def setup_game(data: SetupRequest):
         "depth": data.depth}
 
 # ------ State Endpoint ------
-@app.get("/state")
+@app.get("/api/state")
 def get_state():
     # Βασικά δεδομένα κατάστασης
     state = {
@@ -78,7 +78,7 @@ class MoveRequest(BaseModel):
     col: int
 
 
-@app.post("/make_move/")
+@app.post("/api/make_move/")
 def make_move(data: MoveRequest):
     global game, human
 
@@ -126,7 +126,7 @@ def make_move(data: MoveRequest):
         
 # ------ AI Turn Endpoint ------
 
-@app.post("/ai_turn/")
+@app.post("/api/ai_turn/")
 def ai_turn():
     global game, ai
 
@@ -196,7 +196,7 @@ def ai_turn():
         }
 
 # ------ Reset Endpoint ------
-@app.post("/reset")
+@app.post("/api/reset")
 def reset():
     global game, ai, human
     game = Board()
