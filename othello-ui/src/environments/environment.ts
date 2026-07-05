@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://othello-backend-s2ep.onrender.com'
+  apiUrl: 'https://othello-reversi-backend.onrender.com'
 };
